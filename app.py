@@ -103,14 +103,37 @@ def create_backup():
     filename = f"backup_{timestamp}.sql"
     filepath = f"/tmp/{filename}"
 
-    dump_cmd = f"pg_dump {DATABASE_URL} > {filepath}"
-    result = subprocess.run(dump_cmd, shell=True)
+    with get_db() as conn:
+        cur = conn.cursor()
 
-    if result.returncode != 0:
-        raise Exception("pg_dump failed")
+        with open(filepath, "w", encoding="utf-8") as f:
+            # public şemasındaki tabloları al
+            cur.execute("""
+                SELECT tablename FROM pg_tables
+                WHERE schemaname='public'
+            """)
+            tables = cur.fetchall()
 
-    subprocess.run(f"gzip {filepath}", shell=True)
-    return f"{filename}.gz", f"{filepath}.gz"
+            for (table,) in tables:
+                f.write(f"\n-- TABLE: {table}\n")
+
+                cur.execute(f"SELECT * FROM {table}")
+                rows = cur.fetchall()
+
+                for row in rows:
+                    values = []
+                    for val in row:
+                        if val is None:
+                            values.append("NULL")
+                        elif isinstance(val, str):
+                            values.append("'" + val.replace("'", "''") + "'")
+                        else:
+                            values.append(str(val))
+
+                    values_str = ", ".join(values)
+                    f.write(f"INSERT INTO {table} VALUES ({values_str});\n")
+
+    return filename, filepath
 
 
 def upload_to_supabase(filename, path):
@@ -118,7 +141,7 @@ def upload_to_supabase(filename, path):
 
     headers = {
         "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Content-Type": "application/gzip"
+        "Content-Type": "text/plain"
     }
 
     with open(path, "rb") as f:
