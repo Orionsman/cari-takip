@@ -238,6 +238,27 @@ def restore_backup(filename):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/backups")
+def list_backups():
+    try:
+        url = f"{SUPABASE_URL}/storage/v1/object/list/{BUCKET}"
+
+        headers = {
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        r = requests.post(url, headers=headers, json={})
+
+        if r.status_code != 200:
+            return jsonify({"error": r.text}), 500
+
+        return jsonify(r.json())
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 # ───────────────────────────────────────────────────────
 # CARİLER
