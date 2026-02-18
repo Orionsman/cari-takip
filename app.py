@@ -246,7 +246,11 @@ def list_backups():
             "Content-Type": "application/json"
         }
 
-        r = requests.post(url, headers=headers, json={})
+        payload = {
+            "prefix": ""
+        }
+
+        r = requests.post(url, headers=headers, json=payload)
 
         if r.status_code != 200:
             return jsonify({"error": r.text}), 500
@@ -255,7 +259,6 @@ def list_backups():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-        print("YENI SURUM CALISIYOR")
 
 
 
