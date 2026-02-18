@@ -1,0 +1,21 @@
+{
+  "name": "Cari Hesap Takip",
+  "short_name": "Cari Takip",
+  "description": "Cari hesap, satış ve ödeme takip sistemi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0f18",
+  "theme_color": "#0d0f18",
+  "orientation": "portrait-primary",
+  "lang": "tr",
+  "categories": ["finance", "business"],
+  "icons": [
+    { "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    { "name": "Yeni Satış", "url": "/?tab=satis", "description": "Satış ekle" },
+    { "name": "Yeni Ödeme", "url": "/?tab=odemeler", "description": "Ödeme ekle" }
+  ]
+}
