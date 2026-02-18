@@ -2,6 +2,7 @@
 Cari Hesap Takip - PWA / Bulut Sürümü
 PostgreSQL Production Version
 """
+print("YENI BACKUP SISTEMI AKTIF")
 
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
@@ -102,7 +103,8 @@ def create_backup():
     timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
     filename = f"backup_{timestamp}.sql"
     filepath = f"/tmp/{filename}"
-
+    print("PYTHON BACKUP CALISIYOR")
+    
     with get_db() as conn:
         cur = conn.cursor()
 
