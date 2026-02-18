@@ -2,8 +2,6 @@
 Cari Hesap Takip - PWA / Bulut Sürümü
 PostgreSQL Production Version
 """
-print("YENI BACKUP SISTEMI AKTIF")
-print("YENI SURUM CALISIYOR")
 
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
