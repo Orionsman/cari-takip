@@ -257,6 +257,7 @@ def list_backups():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+        print("YENI SURUM CALISIYOR")
 
 
 
