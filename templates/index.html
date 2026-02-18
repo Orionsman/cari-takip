@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cari Takip">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<title>Cari Hesap Takip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0b0d14;
+  --surface: #13161f;
+  --card:    #1a1e2e;
+  --card2:   #20253a;
+  --border:  #252b42;
+  --accent:  #5b8cf5;
+  --green:   #2dd4a0;
+  --amber:   #f5a623;
+  --red:     #f06060;
+  --text:    #dde3f5;
+  --sub:     #6b738f;
+  --r:       16px;
+  --mono:    'IBM Plex Mono', monospace;
+  --serif:   'Playfair Display', serif;
+  --sab:     env(safe-area-inset-bottom, 0px);
+  --sat:     env(safe-area-inset-top, 0px);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html { height: 100%; overscroll-behavior: none; }
+body {
+  height: 100%; height: 100dvh;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── App Shell ── */
+#shell { display: flex; flex-direction: column; height: 100%; height: 100dvh; }
+
+/* ── Topbar ── */
+.topbar {
+  padding: calc(var(--sat) + 10px) 16px 10px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; min-height: 56px;
+}
+.topbar-left { display: flex; flex-direction: column; }
+.topbar-title { font-family: var(--serif); font-size: 17px; color: var(--accent); line-height: 1; }
+.topbar-crumb { font-size: 10px; color: var(--sub); margin-top: 3px; letter-spacing: .5px; }
+.topbar-right { display: flex; gap: 8px; align-items: center; }
+.icon-btn { background: var(--card2); border: none; color: var(--text); border-radius: 10px; width: 36px; height: 36px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.icon-btn:active { opacity: .6; }
+
+/* ── Bottom Nav ── */
+.nav {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: var(--sab);
+  flex-shrink: 0;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 0 8px; border: none; background: transparent;
+  color: var(--sub); font-family: var(--mono); font-size: 9px;
+  cursor: pointer; gap: 3px; transition: color .15s;
+}
+.nav-item .ni { font-size: 21px; transition: transform .15s; }
+.nav-item.active { color: var(--accent); }
+.nav-item.active .ni { transform: scale(1.15); }
+
+/* ── Pages ── */
+.pages { flex: 1; position: relative; overflow: hidden; }
+.page {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 14px 14px calc(14px);
+  display: flex; flex-direction: column; gap: 12px;
+  opacity: 0; pointer-events: none;
+  transform: translateX(30px);
+  transition: opacity .2s, transform .2s;
+  -webkit-overflow-scrolling: touch;
+}
+.page.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+
+/* ── Search ── */
+.search-wrap { position: relative; }
+.search-wrap input {
+  width: 100%; background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 11px 14px 11px 40px;
+  color: var(--text); font-family: var(--mono); font-size: 13px; outline: none;
+  -webkit-appearance: none;
+}
+.search-wrap input:focus { border-color: var(--accent); }
+.search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--sub); pointer-events: none; }
+
+/* ── Cards ── */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); }
+.stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 11px 10px; }
+.stat-lbl { font-size: 9px; color: var(--sub); letter-spacing: .8px; text-transform: uppercase; }
+.stat-val { font-family: var(--serif); font-size: 16px; margin-top: 4px; }
+.c-red { color: var(--red); }
+.c-green { color: var(--green); }
+.c-accent { color: var(--accent); }
+.c-amber { color: var(--amber); }
+
+/* ── List Items ── */
+.list { display: flex; flex-direction: column; gap: 8px; }
+.item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 13px 14px;
+  cursor: pointer; transition: border-color .15s, background .15s;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.item:active { background: var(--card2); border-color: var(--accent); }
+.item-body { flex: 1; min-width: 0; }
+.item-name { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
+.item-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.item-meta { text-align: right; }
+.item-val { font-size: 13px; font-weight: 500; }
+.chevron { color: var(--sub); font-size: 18px; }
+
+/* ── Hareket ── */
+.h-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 13px; }
+.h-row1 { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.h-desc { font-size: 13px; flex: 1; line-height: 1.4; }
+.h-amount { font-size: 14px; font-weight: 500; white-space: nowrap; }
+.h-row2 { display: flex; justify-content: space-between; align-items: center; margin-top: 7px; }
+.h-row2-left { display: flex; align-items: center; gap: 6px; }
+.h-date { font-size: 10px; color: var(--sub); }
+.h-tag { font-size: 9px; padding: 2px 6px; border-radius: 5px; letter-spacing: .3px; }
+.tag-satis  { background: rgba(91,140,245,.15); color: var(--accent); }
+.tag-odeme  { background: rgba(45,212,160,.12); color: var(--green); }
+.tag-manuel { background: rgba(107,115,143,.12); color: var(--sub); }
+.h-bkye { font-size: 10px; color: var(--sub); }
+.h-del { color: var(--red); font-size: 20px; cursor: pointer; padding: 0 2px; }
+
+/* ── Tablo Kartı (satış/ödeme) ── */
+.t-item { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 13px; }
+.t-r1 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.t-firma { font-size: 13px; font-weight: 500; }
+.t-amount { font-size: 15px; font-weight: 500; }
+.t-r2 { display: flex; justify-content: space-between; align-items: center; }
+.t-detail { font-size: 11px; color: var(--sub); }
+.t-actions { display: flex; align-items: center; gap: 8px; }
+.t-date { font-size: 10px; color: var(--sub); }
+.t-del { color: var(--red); font-size: 20px; cursor: pointer; }
+
+/* ── Form ── */
+.form-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 15px; }
+.form-title { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; font-weight: 500; }
+.f-row { display: flex; gap: 10px; margin-bottom: 11px; }
+.f-row:last-child { margin-bottom: 0; }
+.field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.field label { font-size: 10px; color: var(--sub); letter-spacing: .3px; }
+.field input, .field select {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 11px 12px;
+  color: var(--text); font-family: var(--mono); font-size: 13px;
+  width: 100%; outline: none; -webkit-appearance: none; appearance: none;
+}
+.field input:focus, .field select:focus { border-color: var(--accent); }
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b738f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center; padding-right: 30px;
+}
+
+/* ── Buttons ── */
+.btn { border: none; border-radius: 12px; padding: 13px 18px; font-family: var(--mono); font-size: 13px; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px; transition: opacity .15s; width: 100%; }
+.btn:active { opacity: .7; }
+.btn-accent { background: var(--accent); color: #fff; }
+.btn-green  { background: var(--green);  color: #041a11; }
+.btn-red    { background: var(--red);    color: #fff; }
+.btn-ghost  { background: var(--card2);  color: var(--text); }
+.btn-sm { padding: 8px 12px; font-size: 11px; border-radius: 9px; width: auto; }
+
+/* ── Detail Header ── */
+.d-header { background: var(--card); border: 1px solid var(--accent); border-radius: var(--r); padding: 15px; }
+.d-firma { font-family: var(--serif); font-size: 21px; color: var(--accent); }
+.d-info { font-size: 11px; color: var(--sub); margin-top: 6px; line-height: 1.9; }
+.d-actions { display: flex; gap: 8px; margin-top: 12px; }
+.back-row { display: flex; align-items: center; gap: 6px; color: var(--accent); font-size: 13px; cursor: pointer; }
+
+/* ── Section Header ── */
+.sec-hdr { display: flex; align-items: center; justify-content: space-between; }
+.sec-lbl { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--sub); }
+
+/* ── Empty State ── */
+.empty { text-align: center; color: var(--sub); padding: 48px 20px; font-size: 13px; line-height: 1.8; }
+.empty-icon { font-size: 36px; display: block; margin-bottom: 10px; }
+
+/* ── Modal Bottom Sheet ── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 200; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity .25s; backdrop-filter: blur(2px); }
+.overlay.show { opacity: 1; pointer-events: all; }
+.sheet {
+  background: var(--surface); border-radius: 22px 22px 0 0;
+  padding: 8px 18px calc(20px + var(--sab));
+  width: 100%; max-height: 92vh; overflow-y: auto;
+  transform: translateY(40px); transition: transform .28s cubic-bezier(.22,1,.36,1);
+  border: 1px solid var(--border); border-bottom: none;
+}
+.overlay.show .sheet { transform: translateY(0); }
+.sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 8px auto 16px; }
+.sheet-title { font-family: var(--serif); font-size: 19px; margin-bottom: 16px; }
+.sheet-btns { display: flex; gap: 10px; margin-top: 16px; }
+.sheet-btns .btn { flex: 1; }
+
+/* ── Install Banner ── */
+.install-banner {
+  background: linear-gradient(135deg, var(--accent), #3d6fd4);
+  border-radius: 14px; padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+.install-banner.hidden { display: none; }
+.install-text { font-size: 12px; line-height: 1.5; flex: 1; }
+.install-text strong { display: block; font-size: 13px; margin-bottom: 2px; }
+
+/* ── Online indicator ── */
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; }
+.status-dot.offline { background: var(--red); }
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title" id="tb-title">◈ Cari Takip</div>
+      <div class="topbar-crumb" id="tb-crumb"></div>
+    </div>
+    <div class="topbar-right">
+      <span class="status-dot" id="net-dot" title="Çevrimiçi"></span>
+      <button class="icon-btn" id="tb-add-btn" onclick="topbarAdd()" title="Ekle">＋</button>
+    </div>
+  </div>
+
+  <!-- PAGES -->
+  <div class="pages">
+
+    <!-- Cariler -->
+    <div class="page active" id="pg-cariler">
+      <div id="install-banner" class="install-banner hidden">
+        <div class="install-text">
+          <strong>📲 Uygulamayı Yükle</strong>
+          Ana ekrana ekleyerek uygulama gibi kullanın.
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="installPWA()" style="white-space:nowrap">Yükle</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('install-banner').classList.add('hidden')" style="width:auto;padding:8px">✕</button>
+      </div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="search" placeholder="Firma ara..." oninput="filterCariler(this.value)" autocomplete="off">
+      </div>
+      <div id="cari-list" class="list"></div>
+    </div>
+
+    <!-- Cari Detay -->
+    <div class="page" id="pg-detay">
+      <div class="back-row" onclick="goBack()"><span>‹</span> Cariler</div>
+      <div id="d-header" class="d-header"></div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-lbl">Borç</div><div class="stat-val c-red"   id="d-borc">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Alacak</div><div class="stat-val c-green" id="d-alacak">—</div></div>
+        <div class="stat-card"><div class="stat-lbl">Bakiye</div><div class="stat-val"        id="d-bakiye">—</div></div>
+      </div>
+      <div class="sec-hdr">
+        <span class="sec-lbl">Hareketler</span>
+        <button class="btn btn-ghost btn-sm" onclick="openSheet('sh-hareket')">＋ Ekle</button>
+      </div>
+      <div id="h-list" class="list"></div>
+    </div>
+
+    <!-- Ürünler -->
+    <div class="page" id="pg-urunler">
+      <div id="urun-list" class="list"></div>
+    </div>
+
+    <!-- Satış -->
+    <div class="page" id="pg-satis">
+      <div class="form-box">
+        <div class="form-title">Yeni Satış Ekle</div>
+        <div class="f-row"><div class="field"><label>Cari</label><select id="st-cari"></select></div></div>
+        <div class="f-row"><div class="field"><label>Ürün</label><select id="st-urun" onchange="urunFiyatDoldur()"></select></div></div>
+        <div class="f-row">
+          <div class="field"><label>Adet</label><input type="number" id="st-adet" value="1" min="0.001" step="any" inputmode="decimal"></div>
+          <div class="field"><label>Birim Fiyat ₺</label><input type="number" id="st-fiyat" value="0" min="0" step="any" inputmode="decimal"></div>
+        </div>
+        <div class="f-row">
+          <div class="field"><label>Tarih</label><input type="date" id="st-tarih"></div>
+          <div class="field"><label>Açıklama</label><input type="text" id="st-acik" placeholder="—"></div>
+        </div>
+        <div class="f-row"><button class="btn btn-green" onclick="satisKaydet()">🛒 Satışı Kaydet</button></div>
+      </div>
+      <div class="sec-hdr"><span class="sec-lbl">Satış Geçmişi</span></div>
+      <div id="satis-list" class="list"></div>
+    </div>
+
+    <!-- Ödemeler -->
+    <div class="page" id="pg-odemeler">
+      <div class="form-box">
+        <div class="form-title">Yeni Ödeme Ekle</div>
+        <div class="f-row"><div class="field"><label>Cari</label><select id="od-cari"></select></div></div>
+        <div class="f-row">
+          <div class="field"><label>Tutar ₺</label><input type="number" id="od-tutar" value="0" min="0" step="any" inputmode="decimal"></div>
+          <div class="field"><label>Yöntem</label>
+            <select id="od-yontem"><option>Nakit</option><option>Havale/EFT</option><option>Çek</option><option>Kredi Kartı</option><option>Diğer</option></select>
+          </div>
+        </div>
+        <div class="f-row">
+          <div class="field"><label>Tarih</label><input type="date" id="od-tarih"></div>
+          <div class="field"><label>Açıklama</label><input type="text" id="od-acik" placeholder="—"></div>
+        </div>
+        <div class="f-row"><button class="btn btn-accent" onclick="odemeKaydet()">💰 Ödemeyi Kaydet</button></div>
+      </div>
+      <div class="sec-hdr"><span class="sec-lbl">Ödeme Geçmişi</span></div>
+      <div id="odeme-list" class="list"></div>
+    </div>
+
+  </div><!-- /pages -->
+
+  <!-- BOTTOM NAV -->
+  <nav class="nav">
+    <button class="nav-item active" data-pg="cariler" onclick="navTo('cariler')"><span class="ni">👥</span>Cariler</button>
+    <button class="nav-item" data-pg="urunler"  onclick="navTo('urunler')"><span class="ni">📦</span>Ürünler</button>
+    <button class="nav-item" data-pg="satis"    onclick="navTo('satis')"><span class="ni">🛒</span>Satış</button>
+    <button class="nav-item" data-pg="odemeler" onclick="navTo('odemeler')"><span class="ni">💰</span>Ödemeler</button>
+  </nav>
+</div>
+
+<!-- ── BOTTOM SHEETS ──────────────────────────────────────────────────────────── -->
+
+<!-- Cari Sheet -->
+<div class="overlay" id="sh-cari">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sh-cari-title">Yeni Cari</div>
+    <input type="hidden" id="sc-id">
+    <div class="f-row"><div class="field"><label>Firma Adı *</label><input type="text" id="sc-firma" autocomplete="organization"></div></div>
+    <div class="f-row"><div class="field"><label>Yetkili</label><input type="text" id="sc-yetkili" autocomplete="name"></div></div>
+    <div class="f-row">
+      <div class="field"><label>Telefon</label><input type="tel" id="sc-tel" autocomplete="tel"></div>
+      <div class="field"><label>E-posta</label><input type="email" id="sc-email" autocomplete="email"></div>
+    </div>
+    <div class="f-row"><div class="field"><label>Adres</label><input type="text" id="sc-adres" autocomplete="street-address"></div></div>
+    <div class="f-row"><div class="field"><label>Notlar</label><input type="text" id="sc-notlar"></div></div>
+    <div class="sheet-btns">
+      <button class="btn btn-ghost" onclick="closeSheet('sh-cari')">İptal</button>
+      <button class="btn btn-accent" onclick="cariKaydet()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ürün Sheet -->
+<div class="overlay" id="sh-urun">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sh-urun-title">Yeni Ürün</div>
+    <input type="hidden" id="su-id">
+    <div class="f-row"><div class="field"><label>Ürün Adı *</label><input type="text" id="su-ad"></div></div>
+    <div class="f-row">
+      <div class="field"><label>Kod</label><input type="text" id="su-kod"></div>
+      <div class="field"><label>Birim</label>
+        <select id="su-birim"><option>Adet</option><option>Kg</option><option>Lt</option><option>Mt</option><option>Kutu</option><option>Paket</option><option>Ton</option><option>m²</option></select>
+      </div>
+    </div>
+    <div class="f-row">
+      <div class="field"><label>Fiyat ₺</label><input type="number" id="su-fiyat" value="0" step="any" inputmode="decimal"></div>
+      <div class="field"><label>Stok</label><input type="number" id="su-stok" value="0" step="any" inputmode="decimal"></div>
+    </div>
+    <div class="f-row"><div class="field"><label>Notlar</label><input type="text" id="su-notlar"></div></div>
+    <div class="sheet-btns">
+      <button class="btn btn-ghost" onclick="closeSheet('sh-urun')">İptal</button>
+      <button class="btn btn-green" onclick="urunKaydet()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Hareket Sheet -->
+<div class="overlay" id="sh-hareket">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Manuel Hareket</div>
+    <div class="f-row"><div class="field"><label>Tarih</label><input type="date" id="mh-tarih"></div></div>
+    <div class="f-row"><div class="field"><label>Açıklama</label><input type="text" id="mh-acik"></div></div>
+    <div class="f-row">
+      <div class="field"><label>Borç ₺</label><input type="number" id="mh-borc" value="0" step="any" inputmode="decimal"></div>
+      <div class="field"><label>Alacak ₺</label><input type="number" id="mh-alacak" value="0" step="any" inputmode="decimal"></div>
+    </div>
+    <div class="sheet-btns">
+      <button class="btn btn-ghost" onclick="closeSheet('sh-hareket')">İptal</button>
+      <button class="btn btn-accent" onclick="hareketKaydet()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+const S = { page: 'cariler', cariler: [], urunler: [], satislar: [], odemeler: [], cari: null };
+
+// ── Utils ──────────────────────────────────────────────────────────────────────
+const today = () => new Date().toLocaleDateString('tr-CA');
+const fmt   = n  => (+(n||0)).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' ₺';
+const $     = id => document.getElementById(id);
+const api   = {
+  get:  url    => fetch(url).then(r=>r.json()),
+  post: (url,d)=> fetch(url,{method:'POST',  headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(r=>r.json()),
+  put:  (url,d)=> fetch(url,{method:'PUT',   headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(r=>r.json()),
+  del:  url    => fetch(url,{method:'DELETE'}).then(r=>r.json()),
+};
+
+// ── Navigation ─────────────────────────────────────────────────────────────────
+function navTo(pg) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  $('pg-'+pg).classList.add('active');
+  document.querySelector(`[data-pg="${pg}"]`)?.classList.add('active');
+  S.page = pg;
+  $('tb-add-btn').style.display = ['cariler','urunler','detay'].includes(pg) ? '' : 'none';
+  const titles = {cariler:'◈ Cari Takip',urunler:'📦 Ürünler',satis:'🛒 Satış',odemeler:'💰 Ödemeler',detay:'◈ Cari Detay'};
+  $('tb-title').textContent = titles[pg] || '◈ Cari Takip';
+  if (pg==='cariler')  loadCariler();
+  if (pg==='urunler')  loadUrunler();
+  if (pg==='satis')    initSatis();
+  if (pg==='odemeler') initOdemeler();
+}
+
+function showDetay(c) {
+  S.cari = c;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  $('pg-detay').classList.add('active');
+  S.page = 'detay';
+  $('tb-title').textContent = '◈ Cari Detay';
+  $('tb-crumb').textContent = c.firma_adi;
+  $('tb-add-btn').style.display = '';
+  renderDetay(c);
+  loadOzet(); loadHareketler();
+}
+
+function goBack() {
+  $('tb-crumb').textContent = '';
+  navTo('cariler');
+}
+
+function topbarAdd() {
+  if (S.page==='cariler') openCariSheet();
+  if (S.page==='urunler') openUrunSheet();
+  if (S.page==='detay')   openCariSheet(S.cari);
+}
+
+// ── Sheet ──────────────────────────────────────────────────────────────────────
+function openSheet(id) { $(id).classList.add('show'); document.body.style.overflow='hidden'; }
+function closeSheet(id){ $(id).classList.remove('show'); document.body.style.overflow=''; }
+document.querySelectorAll('.overlay').forEach(o =>
+  o.addEventListener('click', e => { if(e.target===o) closeSheet(o.id); }));
+
+// ── Cariler ────────────────────────────────────────────────────────────────────
+async function loadCariler(q='') {
+  S.cariler = await api.get('/api/cariler?q='+encodeURIComponent(q));
+  const el = $('cari-list');
+  if (!S.cariler.length) { el.innerHTML = '<div class="empty"><span class="empty-icon">👥</span>Henüz cari yok.<br>Sağ üstteki <strong>＋</strong> ile ekleyin.</div>'; return; }
+  el.innerHTML = S.cariler.map(c => `
+    <div class="item" onclick='showDetay(${JSON.stringify(c)})'>
+      <div class="item-body">
+        <div class="item-name">${esc(c.firma_adi)}</div>
+        <div class="item-sub">${esc(c.yetkili||'')}${c.telefon?' · '+esc(c.telefon):''}</div>
+      </div>
+      <span class="chevron">›</span>
+    </div>`).join('');
+}
+
+let _ft; function filterCariler(v){ clearTimeout(_ft); _ft=setTimeout(()=>loadCariler(v),220); }
+
+function openCariSheet(c) {
+  $('sc-id').value     = c?.id||'';
+  $('sc-firma').value  = c?.firma_adi||'';
+  $('sc-yetkili').value= c?.yetkili||'';
+  $('sc-tel').value    = c?.telefon||'';
+  $('sc-email').value  = c?.email||'';
+  $('sc-adres').value  = c?.adres||'';
+  $('sc-notlar').value = c?.notlar||'';
+  $('sh-cari-title').textContent = c ? 'Cari Düzenle' : 'Yeni Cari';
+  openSheet('sh-cari');
+  setTimeout(()=>$('sc-firma').focus(), 350);
+}
+
+async function cariKaydet() {
+  const firma = $('sc-firma').value.trim();
+  if (!firma) { alert('Firma adı zorunludur'); return; }
+  const d = {firma_adi:firma,yetkili:$('sc-yetkili').value.trim(),telefon:$('sc-tel').value.trim(),
+              email:$('sc-email').value.trim(),adres:$('sc-adres').value.trim(),notlar:$('sc-notlar').value.trim()};
+  const id = $('sc-id').value;
+  const r  = id ? await api.put('/api/cariler/'+id, d) : await api.post('/api/cariler', d);
+  if (r.error) { alert(r.error); return; }
+  closeSheet('sh-cari');
+  if (S.page==='detay') { S.cari={...S.cari,...d}; renderDetay(S.cari); }
+  loadCariler();
+}
+
+async function cariSil(id) {
+  if (!confirm('Bu cari ve tüm kayıtları silinecek. Emin misiniz?')) return;
+  await api.del('/api/cariler/'+id);
+  goBack(); loadCariler();
+}
+
+// ── Detay ──────────────────────────────────────────────────────────────────────
+function renderDetay(c) {
+  $('d-header').innerHTML = `
+    <div class="d-firma">${esc(c.firma_adi)}</div>
+    <div class="d-info">
+      ${c.yetkili?'👤 '+esc(c.yetkili)+'<br>':''}
+      ${c.telefon?'📞 <a href="tel:'+esc(c.telefon)+'" style="color:var(--accent)">'+esc(c.telefon)+'</a><br>':''}
+      ${c.email  ?'✉ <a href="mailto:'+esc(c.email)+'" style="color:var(--accent)">'+esc(c.email)+'</a><br>':''}
+      ${c.adres  ?'📍 '+esc(c.adres):''}
+    </div>
+    <div class="d-actions">
+      <button class="btn btn-ghost btn-sm" onclick="openCariSheet(S.cari)">✏ Düzenle</button>
+      <button class="btn btn-red btn-sm" onclick="cariSil(${c.id})">🗑 Sil</button>
+    </div>`;
+}
+
+async function loadOzet() {
+  const oz = await api.get('/api/cariler/'+S.cari.id+'/ozet');
+  $('d-borc').textContent   = fmt(oz.borc);
+  $('d-alacak').textContent = fmt(oz.alacak);
+  const bEl = $('d-bakiye');
+  bEl.textContent = fmt(oz.bakiye);
+  bEl.className = 'stat-val ' + (oz.bakiye > 0 ? 'c-red' : 'c-green');
+}
+
+async function loadHareketler() {
+  const rows = await api.get('/api/hareketler/'+S.cari.id);
+  const el = $('h-list');
+  if (!rows.length) { el.innerHTML='<div class="empty"><span class="empty-icon">📋</span>Henüz hareket yok.</div>'; return; }
+  el.innerHTML = [...rows].reverse().map(h => `
+    <div class="h-item">
+      <div class="h-row1">
+        <div class="h-desc">${esc(h.aciklama||'—')}</div>
+        <div class="h-amount ${h.borc>0?'c-red':'c-green'}">${h.borc>0?'+'+fmt(h.borc):'-'+fmt(h.alacak)}</div>
+      </div>
+      <div class="h-row2">
+        <div class="h-row2-left">
+          <span class="h-date">${h.tarih}</span>
+          <span class="h-tag tag-${h.tur||'manuel'}">${h.tur||'manuel'}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="h-bkye">Bkye: ${fmt(h.bakiye)}</span>
+          <span class="h-del" onclick="hareketSil(${h.id})">×</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openHareketSheet() {
+  $('mh-tarih').value  = today();
+  $('mh-acik').value   = '';
+  $('mh-borc').value   = '0';
+  $('mh-alacak').value = '0';
+  openSheet('sh-hareket');
+}
+
+async function hareketKaydet() {
+  await api.post('/api/hareketler', {
+    cari_id: S.cari.id, tarih: $('mh-tarih').value,
+    aciklama: $('mh-acik').value.trim(),
+    borc: $('mh-borc').value, alacak: $('mh-alacak').value,
+  });
+  closeSheet('sh-hareket'); loadOzet(); loadHareketler();
+}
+
+async function hareketSil(id) {
+  if (!confirm('Bu hareket silinsin mi?')) return;
+  await api.del('/api/hareketler/'+id);
+  loadOzet(); loadHareketler();
+}
+
+// ── Ürünler ────────────────────────────────────────────────────────────────────
+async function loadUrunler() {
+  S.urunler = await api.get('/api/urunler');
+  const el = $('urun-list');
+  if (!S.urunler.length) { el.innerHTML='<div class="empty"><span class="empty-icon">📦</span>Henüz ürün yok.<br>Sağ üstteki <strong>＋</strong> ile ekleyin.</div>'; return; }
+  el.innerHTML = S.urunler.map(u => `
+    <div class="item" style="cursor:default">
+      <div class="item-body">
+        <div class="item-name">${esc(u.ad)}${u.kod?' <span style="color:var(--sub);font-size:11px">['+esc(u.kod)+']</span>':''}</div>
+        <div class="item-sub">${u.birim} · Stok: ${u.stok}</div>
+      </div>
+      <div class="item-right">
+        <div class="item-meta">
+          <div class="item-val c-amber">${fmt(u.fiyat)}</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="openUrunSheet(${u.id})" style="width:auto;padding:7px 10px">✏</button>
+        <button class="btn btn-red btn-sm"   onclick="urunSil(${u.id})" style="width:auto;padding:7px 10px">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function openUrunSheet(uid) {
+  const u = uid ? S.urunler.find(x=>x.id===uid) : null;
+  $('su-id').value    = u?.id||'';
+  $('su-ad').value    = u?.ad||'';
+  $('su-kod').value   = u?.kod||'';
+  $('su-birim').value = u?.birim||'Adet';
+  $('su-fiyat').value = u?.fiyat||'0';
+  $('su-stok').value  = u?.stok||'0';
+  $('su-notlar').value= u?.notlar||'';
+  $('sh-urun-title').textContent = u ? 'Ürün Düzenle' : 'Yeni Ürün';
+  openSheet('sh-urun');
+  setTimeout(()=>$('su-ad').focus(), 350);
+}
+
+async function urunKaydet() {
+  const ad = $('su-ad').value.trim();
+  if (!ad) { alert('Ürün adı zorunludur'); return; }
+  const d = {ad,kod:$('su-kod').value.trim(),birim:$('su-birim').value,
+              fiyat:$('su-fiyat').value,stok:$('su-stok').value,notlar:$('su-notlar').value.trim()};
+  const id = $('su-id').value;
+  const r  = id ? await api.put('/api/urunler/'+id,d) : await api.post('/api/urunler',d);
+  if (r.error) { alert(r.error); return; }
+  closeSheet('sh-urun'); loadUrunler();
+}
+
+async function urunSil(id) {
+  if (!confirm('Bu ürün silinsin mi?')) return;
+  const r = await api.del('/api/urunler/'+id);
+  if (r.error) alert(r.error); else loadUrunler();
+}
+
+// ── Satış ──────────────────────────────────────────────────────────────────────
+async function initSatis() {
+  const [c, u] = await Promise.all([api.get('/api/cariler'), api.get('/api/urunler')]);
+  S.cariler = c; S.urunler = u;
+  $('st-cari').innerHTML = '<option value="">— Cari Seçin —</option>' + c.map(x=>`<option value="${x.id}">${esc(x.firma_adi)}</option>`).join('');
+  $('st-urun').innerHTML = '<option value="">— Ürün Seçin —</option>' + u.map(x=>`<option value="${x.id}" data-f="${x.fiyat}">${esc(x.ad)}</option>`).join('');
+  $('st-tarih').value = today();
+  loadSatislar();
+}
+
+function urunFiyatDoldur() {
+  const opt = $('st-urun').selectedOptions[0];
+  if (opt?.dataset.f) $('st-fiyat').value = opt.dataset.f;
+}
+
+async function loadSatislar() {
+  S.satislar = await api.get('/api/satislar');
+  const el = $('satis-list');
+  if (!S.satislar.length) { el.innerHTML='<div class="empty"><span class="empty-icon">🛒</span>Henüz satış yok.</div>'; return; }
+  el.innerHTML = S.satislar.map(s=>`
+    <div class="t-item">
+      <div class="t-r1"><span class="t-firma">${esc(s.firma_adi)}</span><span class="t-amount c-amber">${fmt(s.toplam)}</span></div>
+      <div class="t-r2">
+        <span class="t-detail">${esc(s.urun_adi)} × ${s.adet} @ ${fmt(s.birim_fiyat)}</span>
+        <div class="t-actions"><span class="t-date">${s.tarih}</span><span class="t-del" onclick="satisSil(${s.id})">×</span></div>
+      </div>
+    </div>`).join('');
+}
+
+async function satisKaydet() {
+  const cariId = $('st-cari').value, urunId = $('st-urun').value;
+  if (!cariId) { alert('Cari seçin'); return; }
+  if (!urunId) { alert('Ürün seçin'); return; }
+  const adet = parseFloat($('st-adet').value), fiyat = parseFloat($('st-fiyat').value);
+  if (!adet||adet<=0) { alert('Geçerli adet girin'); return; }
+  const urunAdi = $('st-urun').selectedOptions[0]?.text || '';
+  const r = await api.post('/api/satislar',{cari_id:cariId,urun_id:urunId,urun_adi:urunAdi,tarih:$('st-tarih').value,adet,birim_fiyat:fiyat,aciklama:$('st-acik').value.trim()});
+  if (r.ok) { alert('✓ Satış kaydedildi: '+fmt(r.toplam)); $('st-adet').value='1'; $('st-acik').value=''; loadSatislar(); }
+  else alert(r.error||'Hata oluştu');
+}
+
+async function satisSil(id) {
+  if (!confirm('Bu satış silinsin mi?')) return;
+  await api.del('/api/satislar/'+id); loadSatislar();
+}
+
+// ── Ödemeler ───────────────────────────────────────────────────────────────────
+async function initOdemeler() {
+  S.cariler = await api.get('/api/cariler');
+  $('od-cari').innerHTML = '<option value="">— Cari Seçin —</option>' + S.cariler.map(x=>`<option value="${x.id}">${esc(x.firma_adi)}</option>`).join('');
+  $('od-tarih').value = today();
+  loadOdemeler();
+}
+
+async function loadOdemeler() {
+  S.odemeler = await api.get('/api/odemeler');
+  const el = $('odeme-list');
+  if (!S.odemeler.length) { el.innerHTML='<div class="empty"><span class="empty-icon">💰</span>Henüz ödeme yok.</div>'; return; }
+  el.innerHTML = S.odemeler.map(o=>`
+    <div class="t-item">
+      <div class="t-r1"><span class="t-firma">${esc(o.firma_adi)}</span><span class="t-amount c-green">${fmt(o.tutar)}</span></div>
+      <div class="t-r2">
+        <span class="t-detail">${esc(o.yontem)}${o.aciklama?' · '+esc(o.aciklama):''}</span>
+        <div class="t-actions"><span class="t-date">${o.tarih}</span><span class="t-del" onclick="odemeSil(${o.id})">×</span></div>
+      </div>
+    </div>`).join('');
+}
+
+async function odemeKaydet() {
+  const cariId = $('od-cari').value;
+  if (!cariId) { alert('Cari seçin'); return; }
+  const tutar = parseFloat($('od-tutar').value);
+  if (!tutar||tutar<=0) { alert('Geçerli tutar girin'); return; }
+  const r = await api.post('/api/odemeler',{cari_id:cariId,tarih:$('od-tarih').value,tutar,yontem:$('od-yontem').value,aciklama:$('od-acik').value.trim()});
+  if (r.ok) { alert('✓ Ödeme kaydedildi: '+fmt(tutar)); $('od-tutar').value='0'; $('od-acik').value=''; loadOdemeler(); }
+  else alert(r.error||'Hata oluştu');
+}
+
+async function odemeSil(id) {
+  if (!confirm('Bu ödeme silinsin mi?')) return;
+  await api.del('/api/odemeler/'+id); loadOdemeler();
+}
+
+// ── XSS güvenlik ──────────────────────────────────────────────────────────────
+function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+// ── Network durumu ────────────────────────────────────────────────────────────
+function updateNet() {
+  const dot = $('net-dot');
+  dot.classList.toggle('offline', !navigator.onLine);
+  dot.title = navigator.onLine ? 'Çevrimiçi' : 'Çevrimdışı';
+}
+window.addEventListener('online',  updateNet);
+window.addEventListener('offline', updateNet);
+updateNet();
+
+// ── PWA Install ───────────────────────────────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  $('install-banner').classList.remove('hidden');
+});
+function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
+    $('install-banner').classList.add('hidden');
+  });
+}
+window.addEventListener('appinstalled', () => $('install-banner').classList.add('hidden'));
+
+// ── Service Worker ────────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js', {scope:'/'}).catch(()=>{});
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+$('tb-add-btn').style.display = '';
+loadCariler();
+</script>
+</body>
+</html>
