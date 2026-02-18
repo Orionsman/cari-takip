@@ -189,6 +189,55 @@ def sw():
 def index():
     return render_template("index.html")
 
+@app.route("/restore/<filename>")
+def restore_backup(filename):
+    try:
+        if not SUPABASE_URL or not SUPABASE_KEY:
+            return jsonify({"error": "Supabase config missing"}), 500
+
+        # 1️⃣ Supabase'ten dosyayı indir
+        download_url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET}/{filename}"
+
+        headers = {
+            "Authorization": f"Bearer {SUPABASE_KEY}"
+        }
+
+        r = requests.get(download_url, headers=headers)
+
+        if r.status_code != 200:
+            return jsonify({"error": "Backup file not found"}), 404
+
+        sql_content = r.text
+
+        # 2️⃣ Database'e yaz
+        with get_db() as conn:
+            cur = conn.cursor()
+
+            # Önce tüm tabloları temizle
+            cur.execute("""
+                TRUNCATE TABLE 
+                hareketler,
+                satislar,
+                odemeler,
+                urunler,
+                cariler
+                RESTART IDENTITY CASCADE;
+            """)
+
+            # SQL dosyasını çalıştır
+            commands = sql_content.split(";")
+
+            for command in commands:
+                command = command.strip()
+                if command:
+                    cur.execute(command)
+
+        return jsonify({"status": "Restore completed"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # ───────────────────────────────────────────────────────
 # CARİLER
 # ───────────────────────────────────────────────────────
