@@ -8,17 +8,29 @@ import os
 import psycopg2
 from psycopg2 import errors
 
+# 🔽 BACKUP IMPORTLARI
+import subprocess
+import requests
+from datetime import datetime
+
 app = Flask(__name__)
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+
 PORT = int(os.environ.get("PORT", 5000))
+BUCKET = "db-backups"
 
 # ───────────────────────────────────────────────────────
 # VERİTABANI
 # ───────────────────────────────────────────────────────
 
 def get_db():
-    conn = psycopg2.connect(DATABASE_URL)
+    conn = psycopg2.connect(
+        DATABASE_URL,
+        sslmode="require"  # 🔥 Railway için gerekli
+    )
     conn.autocommit = True
     return conn
 
@@ -81,6 +93,57 @@ def init_db():
                 aciklama TEXT
             );
         """)
+
+# ───────────────────────────────────────────────────────
+# 🔒 BACKUP SİSTEMİ (Supabase Storage)
+# ───────────────────────────────────────────────────────
+
+def create_backup():
+    timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    filename = f"backup_{timestamp}.sql"
+    filepath = f"/tmp/{filename}"
+
+    dump_cmd = f"pg_dump {DATABASE_URL} > {filepath}"
+    result = subprocess.run(dump_cmd, shell=True)
+
+    if result.returncode != 0:
+        raise Exception("pg_dump failed")
+
+    subprocess.run(f"gzip {filepath}", shell=True)
+    return f"{filename}.gz", f"{filepath}.gz"
+
+
+def upload_to_supabase(filename, path):
+    url = f"{SUPABASE_URL}/storage/v1/object/{BUCKET}/{filename}"
+
+    headers = {
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/gzip"
+    }
+
+    with open(path, "rb") as f:
+        r = requests.post(url, headers=headers, data=f)
+
+    if r.status_code not in [200, 201]:
+        raise Exception(r.text)
+
+
+@app.route("/backup-now")
+def manual_backup():
+    try:
+        if not SUPABASE_URL or not SUPABASE_KEY:
+            return jsonify({"error": "Supabase config missing"}), 500
+
+        filename, path = create_backup()
+        upload_to_supabase(filename, path)
+
+        return jsonify({
+            "status": "Backup uploaded",
+            "file": filename
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ───────────────────────────────────────────────────────
 # PWA DOSYALARI
