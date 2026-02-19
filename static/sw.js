@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cari-pwa-v2';
+const CACHE_NAME = 'cari-pwa-v3';
 const SHELL = ['/', '/static/manifest.json', '/static/icon-192.png'];
 
 // ── Install: shell cache ───────────────────────────────────────────────────────
