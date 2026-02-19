@@ -547,24 +547,29 @@ async function loadOzet() {
 async function loadHareketler() {
   const rows = await api.get('/api/hareketler/'+S.cari.id);
   const el = $('h-list');
-  if (!rows.length) { el.innerHTML='<div class="empty"><span class="empty-icon">📋</span>Henüz hareket yok.</div>'; return; }
+  if (!rows.length) {
+    el.innerHTML='<div class="empty"><span class="empty-icon">📋</span>Henüz hareket yok.</div>';
+    return;
+  }
+
   el.innerHTML = [...rows].reverse().map(h => `
     <div class="h-item">
       <div class="h-row1">
         <div class="h-desc">${esc(h.aciklama||'—')}</div>
-        <div class="h-amount ${h.borc>0?'c-red':'c-green'}">${h.borc>0?'+'+fmt(h.borc):'-'+fmt(h.alacak)}</div>
+        <div class="h-amount ${h.borc>0?'c-red':'c-green'}">
+          ${h.borc>0?'+'+fmt(h.borc):'-'+fmt(h.alacak)}
+        </div>
       </div>
       <div class="h-row2">
         <div class="h-row2-left">
           <span class="h-date">${h.tarih}</span>
           <span class="h-tag tag-${h.tur||'manuel'}">${h.tur||'manuel'}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span class="h-bkye">Bkye: ${fmt(h.bakiye)}</span>
-          <span class="h-del" onclick="hareketSil(${h.id})">×</span>
-        </div>
+        <span class="h-bkye">Bkye: ${fmt(h.bakiye)}</span>
       </div>
     </div>`).join('');
+}
+
 }
 
 function openHareketSheet() {
