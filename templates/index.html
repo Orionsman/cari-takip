@@ -30,6 +30,18 @@
   --font:    'DM Mono', monospace;
   --serif:   'DM Serif Display', serif;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --input-bg: #0d0f18;
+}
+
+body.light-mode {
+  --bg:      #f2f4fb;
+  --panel:   #ffffff;
+  --card:    #ffffff;
+  --card2:   #eef1ff;
+  --text:    #1a2140;
+  --sub:     #5a6387;
+  --border:  #d3daee;
+  --input-bg: #ffffff;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -49,6 +61,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .topbar-title { font-family: var(--serif); font-size: 18px; color: var(--accent); }
 .topbar-sub { font-size: 10px; color: var(--sub); margin-top: 2px; }
 .topbar-btn { background: var(--card2); border: none; color: var(--text); border-radius: 8px; padding: 7px 12px; font-family: var(--font); font-size: 12px; cursor: pointer; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; }
 
 /* ── Bottom Nav ── */
 .bottom-nav {
@@ -94,7 +107,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
 .field label { font-size: 10px; color: var(--sub); }
 .field input, .field select {
-  background: #0d0f18; border: 1px solid var(--border);
+  background: var(--input-bg); border: 1px solid var(--border);
   border-radius: 8px; padding: 10px 12px;
   color: var(--text); font-family: var(--font); font-size: 13px;
   width: 100%; outline: none;
@@ -102,6 +115,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 }
 .field input:focus, .field select:focus { border-color: var(--accent); }
 .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a82a8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.field input[readonly] { cursor: pointer; }
 
 /* ── Buttons ── */
 .btn { border: none; border-radius: 10px; padding: 12px 18px; font-family: var(--font); font-size: 13px; cursor: pointer; font-weight: 500; transition: opacity .15s; }
@@ -188,7 +202,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div class="topbar-title">◈ Cari Takip</div>
       <div class="topbar-sub" id="topbar-sub">Yükleniyor...</div>
     </div>
-    <button class="topbar-btn" id="topbar-action-btn" onclick="topbarAction()">+ Ekle</button>
+    <div class="topbar-actions">
+      <button class="topbar-btn" id="theme-toggle-btn" onclick="toggleTheme()">☾ Koyu</button>
+      <button class="topbar-btn" id="topbar-action-btn" onclick="topbarAction()">+ Ekle</button>
+    </div>
   </div>
 
   <!-- ── PAGE: CARİLER ─────────────────────────────────────────────────── -->
@@ -211,7 +228,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     </div>
     <div class="section-header">
       <span class="section-title">Hareketler</span>
-      <button class="btn btn-ghost btn-sm" onclick="openHareket()">+ Hareket</button>
+      
     </div>
     <div id="hareket-list" class="list-container"></div>
   </div>
@@ -241,7 +258,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       </div>
       <div class="form-row">
         <div class="field"><label>Tarih</label>
-          <input type="date" id="st-tarih"></div>
+          <input type="date" id="st-tarih" readonly onclick="openDatePicker(this)" onfocus="openDatePicker(this)" onkeydown="return false"></div>
       </div>
       <div class="form-row">
         <div class="field"><label>Açıklama</label>
@@ -276,7 +293,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       </div>
       <div class="form-row">
         <div class="field"><label>Tarih</label>
-          <input type="date" id="od-tarih"></div>
+          <input type="date" id="od-tarih" readonly onclick="openDatePicker(this)" onfocus="openDatePicker(this)" onkeydown="return false"></div>
       </div>
       <div class="form-row">
         <div class="field"><label>Açıklama</label>
@@ -379,10 +396,34 @@ let state = {
   cariler: [], urunler: [], satislar: [], odemeler: [],
   selectedCari: null,
   hareketler: [],
-  prevPage: null
+  prevPage: null,
+  theme: localStorage.getItem('theme') || 'dark'
 };
 
 const today = () => new Date().toISOString().split('T')[0];
+
+function applyTheme(theme) {
+  state.theme = theme;
+  document.body.classList.toggle('light-mode', theme === 'light');
+  localStorage.setItem('theme', theme);
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = theme === 'light' ? '☀ Açık' : '☾ Koyu';
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.setAttribute('content', theme === 'light' ? '#ffffff' : '#0f1117');
+}
+
+function toggleTheme() {
+  applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+}
+
+function openDatePicker(input) {
+  if (typeof input.showPicker === 'function') {
+    input.showPicker();
+    return;
+  }
+  input.blur();
+  input.focus();
+}
 
 // ── API ────────────────────────────────────────────────────────────────────────
 const api = {
@@ -415,7 +456,7 @@ function updateTopbar(page) {
   const labels = { cariler: 'Cari Listesi', urunler: 'Ürün Listesi', satis: 'Satış', odemeler: 'Ödemeler', detay: 'Cari Detay' };
   const counts = { cariler: state.cariler.length + ' kayıt', urunler: state.urunler.length + ' ürün', satis: state.satislar.length + ' satış', odemeler: state.odemeler.length + ' ödeme', detay: state.selectedCari?.firma_adi || '' };
   document.getElementById('topbar-sub').textContent = counts[page] || '';
-  const addLabels = { cariler: '+ Cari', urunler: '+ Ürün', satis: '', odemeler: '', detay: '✏ Düzenle' };
+  const addLabels = { cariler: '+ Cari', urunler: '+ Ürün', satis: '', odemeler: '', detay: '' };
   const btn = document.getElementById('topbar-action-btn');
   btn.textContent = addLabels[page] || '';
   btn.style.display = addLabels[page] ? '' : 'none';
@@ -507,7 +548,6 @@ async function loadHareketler() {
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="hareket-bakiye">Bkye: ${fmt(h.bakiye)}</span>
-          <span onclick="hareketSil(${h.id})" style="color:var(--red);cursor:pointer;font-size:16px">×</span>
         </div>
       </div>
     </div>`).join('');
@@ -548,13 +588,6 @@ async function cariSil(id) {
 }
 
 // ── Hareketler ─────────────────────────────────────────────────────────────────
-function openHareket() {
-  document.getElementById('mh-tarih').value = today();
-  document.getElementById('mh-acik').value  = '';
-  document.getElementById('mh-borc').value  = '0';
-  document.getElementById('mh-alacak').value= '0';
-  openModal('modal-hareket');
-}
 
 async function hareketKaydet() {
   await api.post('/api/hareketler', {
@@ -565,12 +598,6 @@ async function hareketKaydet() {
     alacak:  document.getElementById('mh-alacak').value,
   });
   closeModal('modal-hareket');
-  loadOzet(); loadHareketler();
-}
-
-async function hareketSil(id) {
-  if (!confirm('Bu hareket silinsin mi?')) return;
-  await api.delete('/api/hareketler/' + id);
   loadOzet(); loadHareketler();
 }
 
@@ -769,6 +796,7 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
 });
 
 // ── Init ───────────────────────────────────────────────────────────────────────
+applyTheme(state.theme);
 loadCariler();
 
 // PWA Service Worker
