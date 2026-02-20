@@ -594,5 +594,3 @@ if __name__ == "__main__":
     init_db()
     print(f"✓ Sunucu başlatıldı → http://localhost:{PORT}")
     app.run(host="0.0.0.0", port=PORT, debug=False)
-
-init_db()
