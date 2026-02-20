@@ -27,10 +27,12 @@ BUCKET = "db-backups"
 # ───────────────────────────────────────────────────────
 
 def get_db():
-    conn = psycopg2.connect(
-        DATABASE_URL,
-        sslmode="require"  # 🔥 Railway için gerekli
-    )
+    url = os.environ.get("DATABASE_URL")
+    # Bazı platformlar postgres:// ile başlar, psycopg2 postgresql:// tercih eder
+    if url and url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+        
+    conn = psycopg2.connect(url) # sslmode genellikle URL içinde olur
     conn.autocommit = True
     return conn
 
