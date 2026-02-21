@@ -275,6 +275,7 @@ def list_backups():
 # ───────────────────────────────────────────────────────
 
 @app.route("/api/cariler")
+@token_required
 def api_cariler():
     q = request.args.get("q", "")
     with get_db() as conn:
@@ -287,6 +288,7 @@ def api_cariler():
     return jsonify(rows)
 
 @app.route("/api/cariler", methods=["POST"])
+@token_required
 def api_cari_ekle():
     d = request.json
     if not d.get("firma_adi"):
@@ -310,6 +312,7 @@ def api_cari_ekle():
     return jsonify({"ok": True})
 
 @app.route("/api/cariler/<int:cid>", methods=["PUT"])
+@token_required
 def api_cari_guncelle(cid):
     d = request.json
     with get_db() as conn:
@@ -335,6 +338,7 @@ def api_cari_guncelle(cid):
     return jsonify({"ok": True})
 
 @app.route("/api/cariler/<int:cid>", methods=["DELETE"])
+@token_required
 def api_cari_sil(cid):
     with get_db() as conn:
         cur = conn.cursor()
@@ -342,6 +346,7 @@ def api_cari_sil(cid):
     return jsonify({"ok": True})
 
 @app.route("/api/cariler/<int:cid>/ozet")
+@token_required
 def api_cari_ozet(cid):
     with get_db() as conn:
         cur = conn.cursor()
