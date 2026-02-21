@@ -685,28 +685,20 @@
     }
 
     async function cariSil(id) {
-      // Bakiyeyi kontrol et
       const oz = await api.get('/api/cariler/' + id + '/ozet');
       const bakiye = Number(oz.bakiye || 0);
       if (bakiye !== 0) {
-        const mesaj = bakiye > 0
-          ? 'Bu carinin ' + fmt(bakiye) + ' tutarında açık bakiyesi var.
-Önce bakiyeyi sıfırlayın, sonra silebilirsiniz.'
-          : 'Bu carinin ' + fmt(Math.abs(bakiye)) + ' tutarında alacak bakiyesi var.
-Önce bakiyeyi sıfırlayın, sonra silebilirsiniz.';
-        alert('⚠️ Silinemez!
-
-' + mesaj);
+        const tip = bakiye > 0 ? 'borclu' : 'alacakli';
+        alert('Silinemez! ' + fmt(Math.abs(bakiye)) + ' tutarinda ' + tip + ' bakiye var. Once sifirlayin.');
         return;
       }
-      if (!confirm('Bakiye sıfır. Bu cari ve tüm kayıtları kalıcı silinecek.
-Emin misiniz?')) return;
+      if (!confirm('Bakiye sifir. Cari kalici silinecek. Emin misiniz?')) return;
       await api.delete('/api/cariler/' + id);
       goBack();
       loadCariler();
     }
 
-    // ── Hareketler ────────────────────────────────────────────────────────────
+        // ── Hareketler ────────────────────────────────────────────────────────────
     function openHareket() {
       document.getElementById('mh-tarih').value = '';
       document.getElementById('mh-acik').value   = '';
