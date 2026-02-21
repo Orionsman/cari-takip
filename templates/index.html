@@ -483,16 +483,20 @@
       checkAuth();
     }
 
-    // Token'ı tüm fetch isteklerine otomatik ekle
-    function injectAuthHeader() {
-      const originalFetch = window.fetch;
-      window.fetch = function(url, options = {}) {
-        const token = localStorage.getItem("token");
-        if (!options.headers) options.headers = {};
-        if (token) options.headers["Authorization"] = "Bearer " + token;
-        return originalFetch(url, options);
-      };
-    }
+    // Token'ı tüm fetch isteklerine otomatik ekle - SAYFA YÜKLENİRKEN BİR KEZ ÇALIŞIR
+    const _originalFetch = window.fetch.bind(window);
+    window.fetch = function(url, options = {}) {
+      const token = localStorage.getItem("token");
+      if (!options.headers) options.headers = {};
+      if (token) {
+        options.headers["Authorization"] = "Bearer " + token;
+      } else {
+        console.warn("⚠️ fetch: token yok!", url);
+      }
+      return _originalFetch(url, options);
+    };
+
+    function injectAuthHeader() { /* artık gerekmiyor, override baştan yapıldı */ }
 
     // ── State ─────────────────────────────────────────────────────────────────
     let state = {
