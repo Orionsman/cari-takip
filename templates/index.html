@@ -12,7 +12,7 @@
   <link rel="manifest" href="/static/manifest.json">
   <title>Cari Hesap Takip</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
   <script>
     // Tema flash önleme - DOM yüklenmeden önce uygula
     (function() {
@@ -35,8 +35,8 @@
       --sub:     #7a82a8;
       --border:  #2a3050;
       --radius:  14px;
-      --font:    'DM Mono', monospace;
-      --serif:   'DM Serif Display', serif;
+      --font:    'Inter', system-ui, sans-serif;
+      --serif:   'Nunito', 'Inter', sans-serif;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
@@ -55,12 +55,12 @@
       --border:  #d0d5e8;
     }
     [data-theme="light"] .field input,
-    [data-theme="light"] .field select { background: #f0f2f8; }
+    [data-theme="light"] .field select { background: #e8ecf5; border-color: #c8cee0; }
     [data-theme="light"] .search-box input { background: transparent; }
     [data-theme="light"] #login-screen { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 15px; -webkit-font-smoothing: antialiased; }
 
     /* ── Login Ekranı ── */
     #login-screen {
@@ -74,16 +74,17 @@
       border-radius: var(--radius);
       border: 1px solid var(--border);
     }
-    #login-screen h3 { font-family: var(--serif); font-size: 22px; color: var(--accent); }
+    #login-screen h3 { font-family: var(--serif); font-size: 24px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
     #login-screen input {
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
+      border-radius: 10px;
+      padding: 12px 14px;
       color: var(--text);
       font-family: var(--font);
-      font-size: 13px;
+      font-size: 14px;
       outline: none;
+      transition: border-color .15s;
     }
     #login-screen input:focus { border-color: var(--accent); }
     #login-screen button {
@@ -91,11 +92,12 @@
       color: #fff;
       border: none;
       border-radius: 10px;
-      padding: 12px;
+      padding: 13px;
       font-family: var(--font);
-      font-size: 13px;
+      font-size: 14px;
       cursor: pointer;
-      font-weight: 500;
+      font-weight: 600;
+      letter-spacing: 0.2px;
     }
     #login-screen button:active { opacity: 0.8; }
 
@@ -110,9 +112,9 @@
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
     }
-    .topbar-title { font-family: var(--serif); font-size: 18px; color: var(--accent); }
-    .topbar-sub { font-size: 10px; color: var(--sub); margin-top: 2px; }
-    .topbar-btn { background: var(--card2); border: none; color: var(--text); border-radius: 8px; padding: 7px 12px; font-family: var(--font); font-size: 12px; cursor: pointer; }
+    .topbar-title { font-family: var(--serif); font-size: 20px; font-weight: 800; color: var(--accent); letter-spacing: -0.3px; }
+    .topbar-sub { font-size: 11px; color: var(--sub); margin-top: 2px; font-weight: 400; }
+    .topbar-btn { background: var(--card2); border: none; color: var(--text); border-radius: 8px; padding: 7px 13px; font-family: var(--font); font-size: 12px; font-weight: 600; cursor: pointer; }
     .topbar-right { display: flex; align-items: center; gap: 8px; }
     .theme-btn { background: var(--card2); border: none; color: var(--text); border-radius: 8px; padding: 7px 10px; font-size: 16px; cursor: pointer; line-height: 1; }
     .logout-btn { background: transparent; border: 1px solid var(--border); color: var(--sub); border-radius: 8px; padding: 6px 10px; font-family: var(--font); font-size: 11px; cursor: pointer; }
@@ -129,7 +131,7 @@
     .nav-btn {
       flex: 1; display: flex; flex-direction: column; align-items: center;
       padding: 10px 4px 8px; border: none; background: transparent;
-      color: var(--sub); font-family: var(--font); font-size: 9px;
+      color: var(--sub); font-family: var(--font); font-size: 10px; font-weight: 500;
       cursor: pointer; transition: color .2s; gap: 4px;
     }
     .nav-btn .ico { font-size: 20px; }
@@ -147,28 +149,29 @@
       padding: 14px;
       border: 1px solid var(--border);
     }
-    .card-title { font-size: 10px; color: var(--sub); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
-    .card-value { font-family: var(--serif); font-size: 22px; }
+    .card-title { font-size: 10px; color: var(--sub); letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+    .card-value { font-family: var(--serif); font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
 
     .cards-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
     .cards-row .card { padding: 12px 10px; }
-    .cards-row .card-value { font-size: 15px; }
+    .cards-row .card-value { font-size: 14px; font-weight: 700; }
 
     /* ── Form ── */
     .form-card { background: var(--card); border-radius: var(--radius); padding: 14px; border: 1px solid var(--border); }
-    .form-title { font-size: 11px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; font-weight: 500; }
+    .form-title { font-size: 10px; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; font-weight: 700; }
     .form-row { display: flex; gap: 8px; margin-bottom: 10px; }
     .form-row:last-child { margin-bottom: 0; }
     .field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-    .field label { font-size: 10px; color: var(--sub); }
+    .field label { font-size: 11px; color: var(--sub); font-weight: 500; margin-bottom: 2px; letter-spacing: 0.3px; }
     .field input, .field select {
       background: #0d0f18; border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 12px;
-      color: var(--text); font-family: var(--font); font-size: 13px;
+      border-radius: 10px; padding: 11px 14px;
+      color: var(--text); font-family: var(--font); font-size: 14px;
       width: 100%; outline: none;
       -webkit-appearance: none; appearance: none;
+      transition: border-color .15s, box-shadow .15s;
     }
-    .field input:focus, .field select:focus { border-color: var(--accent); }
+    .field input:focus, .field select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(91,138,245,.12); }
     .field select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a82a8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
@@ -177,7 +180,7 @@
     }
 
     /* ── Buttons ── */
-    .btn { border: none; border-radius: 10px; padding: 12px 18px; font-family: var(--font); font-size: 13px; cursor: pointer; font-weight: 500; transition: opacity .15s; }
+    .btn { border: none; border-radius: 10px; padding: 12px 18px; font-family: var(--font); font-size: 13px; cursor: pointer; font-weight: 600; transition: opacity .15s; letter-spacing: 0.1px; }
     .btn:active { opacity: .75; }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-green   { background: var(--green);  color: #0d1a14; }
@@ -198,8 +201,8 @@
       cursor: pointer; transition: border-color .15s;
     }
     .list-item:active, .list-item.selected { border-color: var(--accent); background: var(--card2); }
-    .list-item-main { font-size: 14px; font-weight: 500; }
-    .list-item-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
+    .list-item-main { font-size: 15px; font-weight: 600; }
+    .list-item-sub { font-size: 12px; color: var(--sub); margin-top: 3px; }
     .list-item-badge { font-size: 11px; font-weight: 500; text-align: right; }
     .badge-red { color: var(--red); }
     .badge-green { color: var(--green); }
@@ -209,27 +212,27 @@
     /* ── Hareket Listesi ── */
     .hareket-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; }
     .hareket-top { display: flex; justify-content: space-between; align-items: flex-start; }
-    .hareket-aciklama { font-size: 13px; flex: 1; padding-right: 8px; }
-    .hareket-tutar { font-size: 13px; font-weight: 500; text-align: right; white-space: nowrap; }
+    .hareket-aciklama { font-size: 14px; flex: 1; padding-right: 8px; font-weight: 500; }
+    .hareket-tutar { font-size: 14px; font-weight: 700; text-align: right; white-space: nowrap; }
     .hareket-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
-    .hareket-meta { font-size: 10px; color: var(--sub); }
-    .hareket-bakiye { font-size: 11px; color: var(--sub); }
+    .hareket-meta { font-size: 11px; color: var(--sub); font-weight: 500; }
+    .hareket-bakiye { font-size: 11px; color: var(--sub); font-weight: 500; }
     .h-borc { color: var(--red); }
     .h-alacak { color: var(--green); }
 
     /* ── Tablo (satış/ödeme listesi) ── */
     .tablo-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 13px; }
     .tablo-row1 { display: flex; justify-content: space-between; margin-bottom: 5px; }
-    .tablo-firma { font-size: 13px; font-weight: 500; }
-    .tablo-tutar { font-size: 14px; font-weight: 500; color: var(--orange); }
+    .tablo-firma { font-size: 15px; font-weight: 600; }
+    .tablo-tutar { font-size: 15px; font-weight: 700; color: var(--orange); letter-spacing: -0.3px; }
     .tablo-row2 { display: flex; justify-content: space-between; }
-    .tablo-detail { font-size: 11px; color: var(--sub); }
-    .tablo-date { font-size: 11px; color: var(--sub); }
+    .tablo-detail { font-size: 12px; color: var(--sub); }
+    .tablo-date { font-size: 12px; color: var(--sub); font-weight: 500; }
 
     /* ── Detay sayfası ── */
     .detail-header { background: var(--card); border-radius: var(--radius); padding: 14px; border: 1px solid var(--accent); }
-    .detail-firma { font-family: var(--serif); font-size: 20px; color: var(--accent); }
-    .detail-info { font-size: 11px; color: var(--sub); margin-top: 4px; line-height: 1.8; }
+    .detail-firma { font-family: var(--serif); font-size: 22px; font-weight: 800; color: var(--accent); letter-spacing: -0.3px; }
+    .detail-info { font-size: 12px; color: var(--sub); margin-top: 6px; line-height: 1.9; }
     .back-btn { display: flex; align-items: center; gap: 6px; color: var(--accent); font-size: 13px; cursor: pointer; padding: 2px 0; }
 
     /* ── Modal ── */
@@ -237,14 +240,14 @@
     .modal-overlay.open { opacity: 1; pointer-events: all; }
     .modal { background: var(--panel); border-radius: 20px 20px 0 0; padding: 20px 18px calc(20px + var(--safe-bottom)); width: 100%; max-height: 92vh; overflow-y: auto; transform: translateY(20px); transition: transform .25s; border: 1px solid var(--border); }
     .modal-overlay.open .modal { transform: translateY(0); }
-    .modal-title { font-family: var(--serif); font-size: 18px; margin-bottom: 16px; color: var(--text); }
+    .modal-title { font-family: var(--serif); font-size: 20px; font-weight: 800; margin-bottom: 16px; color: var(--text); letter-spacing: -0.3px; }
     .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
     .modal-btns .btn { flex: 1; }
 
     /* ── Utilities ── */
     .section-header { display: flex; align-items: center; justify-content: space-between; }
-    .section-title { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--sub); }
-    .empty { text-align: center; color: var(--sub); padding: 40px 20px; font-size: 13px; }
+    .section-title { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--sub); font-weight: 700; }
+    .empty { text-align: center; color: var(--sub); padding: 40px 20px; font-size: 14px; line-height: 1.7; }
     .tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 5px; }
     .tag-satis { background: rgba(91,138,245,.15); color: var(--accent); }
     .tag-odeme { background: rgba(52,211,154,.15); color: var(--green); }
@@ -622,6 +625,11 @@
 
     // ── Format ────────────────────────────────────────────────────────────────
     const fmt = n => Number(n || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+    const fmtTarih = t => {
+      if (!t) return '-';
+      const [y, m, d] = t.split('-');
+      return d && m && y ? d + '.' + m + '.' + y : t;
+    };
 
     // ── Cariler ───────────────────────────────────────────────────────────────
     async function loadCariler() {
@@ -702,7 +710,7 @@
           </div>
           <div class="hareket-bottom">
             <div>
-              <span class="hareket-meta">${h.tarih}</span>
+              <span class="hareket-meta">${fmtTarih(h.tarih)}</span>
               <span class="tag tag-${h.tur}" style="margin-left:6px">${h.tur}</span>
             </div>
             <div style="display:flex;align-items:center;gap:8px">
@@ -892,7 +900,7 @@
           <div class="tablo-row2">
             <div class="tablo-detail">${s.urun_adi} × ${s.adet} @ ${fmt(s.birim_fiyat)}</div>
             <div style="display:flex;align-items:center;gap:8px">
-              <span class="tablo-date">${s.tarih}</span>
+              <span class="tablo-date">${fmtTarih(s.tarih)}</span>
               <span onclick="satisSil(${s.id})" style="color:var(--red);cursor:pointer;font-size:18px">×</span>
             </div>
           </div>
@@ -959,7 +967,7 @@
           <div class="tablo-row2">
             <div class="tablo-detail">${o.yontem}${o.aciklama ? ' · ' + o.aciklama : ''}</div>
             <div style="display:flex;align-items:center;gap:8px">
-              <span class="tablo-date">${o.tarih}</span>
+              <span class="tablo-date">${fmtTarih(o.tarih)}</span>
               <span onclick="odemeSil(${o.id})" style="color:var(--red);cursor:pointer;font-size:18px">×</span>
             </div>
           </div>
