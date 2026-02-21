@@ -220,6 +220,20 @@
     .tag-odeme { background: rgba(52,211,154,.15); color: var(--green); }
     .tag-manuel { background: rgba(122,130,168,.1); color: var(--sub); }
     .divider { height: 1px; background: var(--border); }
+
+    /* Tarih input takvim ikonu */
+    input[type=date] { cursor: pointer; }
+    input[type=date]::-webkit-calendar-picker-indicator {
+      filter: invert(0.6) sepia(1) saturate(3) hue-rotate(190deg);
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 4px;
+    }
+    input[type=date]::-webkit-calendar-picker-indicator:hover {
+      filter: invert(0.8) sepia(1) saturate(5) hue-rotate(190deg);
+    }
+    /* Cari detay aksiyon butonlari */
+    .detail-actions { display: flex; gap: 8px; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -585,7 +599,10 @@
       updateTopbar('detay');
       const c = state.selectedCari;
       document.getElementById('detay-header').innerHTML = `
-        <div class="detail-firma">${c.firma_adi}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="detail-firma">${c.firma_adi}</div>
+          <button class="btn btn-red btn-sm" onclick="cariSil(${c.id})" style="flex-shrink:0;margin-left:10px">🗑 Sil</button>
+        </div>
         <div class="detail-info">
           ${c.yetkili ? '👤 ' + c.yetkili + '<br>' : ''}
           ${c.telefon ? '📞 ' + c.telefon + '<br>' : ''}
@@ -668,7 +685,22 @@
     }
 
     async function cariSil(id) {
-      if (!confirm('Bu cari ve tüm kayıtları silinecek. Emin misiniz?')) return;
+      // Bakiyeyi kontrol et
+      const oz = await api.get('/api/cariler/' + id + '/ozet');
+      const bakiye = Number(oz.bakiye || 0);
+      if (bakiye !== 0) {
+        const mesaj = bakiye > 0
+          ? 'Bu carinin ' + fmt(bakiye) + ' tutarında açık bakiyesi var.
+Önce bakiyeyi sıfırlayın, sonra silebilirsiniz.'
+          : 'Bu carinin ' + fmt(Math.abs(bakiye)) + ' tutarında alacak bakiyesi var.
+Önce bakiyeyi sıfırlayın, sonra silebilirsiniz.';
+        alert('⚠️ Silinemez!
+
+' + mesaj);
+        return;
+      }
+      if (!confirm('Bakiye sıfır. Bu cari ve tüm kayıtları kalıcı silinecek.
+Emin misiniz?')) return;
       await api.delete('/api/cariler/' + id);
       goBack();
       loadCariler();
@@ -676,7 +708,7 @@
 
     // ── Hareketler ────────────────────────────────────────────────────────────
     function openHareket() {
-      document.getElementById('mh-tarih').value  = today();
+      document.getElementById('mh-tarih').value = '';
       document.getElementById('mh-acik').value   = '';
       document.getElementById('mh-borc').value   = '0';
       document.getElementById('mh-alacak').value = '0';
@@ -781,7 +813,7 @@
       const uSel = document.getElementById('st-urun');
       cSel.innerHTML = '<option value="">-- Cari Seçin --</option>' + cariler.map(c => `<option value="${c.id}">${c.firma_adi}</option>`).join('');
       uSel.innerHTML = '<option value="">-- Ürün Seçin --</option>' + urunler.map(u => `<option value="${u.id}" data-fiyat="${u.fiyat}">${u.ad}</option>`).join('');
-      document.getElementById('st-tarih').value = today();
+      // tarih kullanici tarafindan secilecek
     }
 
     function urunSecildi() {
@@ -854,7 +886,7 @@
       state.cariler = cariler;
       const sel = document.getElementById('od-cari');
       sel.innerHTML = '<option value="">-- Cari Seçin --</option>' + cariler.map(c => `<option value="${c.id}">${c.firma_adi}</option>`).join('');
-      document.getElementById('od-tarih').value = today();
+      // tarih kullanici tarafindan secilecek
     }
 
     async function loadOdemeler() {
