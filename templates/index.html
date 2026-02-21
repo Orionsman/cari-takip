@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head>
+<head><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0f1117">
@@ -180,7 +180,61 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 </style>
 </head>
 <body>
+  <div id="login-screen" style="display:flex;flex-direction:column;gap:10px;max-width:300px;margin:100px auto;">
+  <h3>Giriş Yap</h3>
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Şifre">
+  <button onclick="login()">Giriş Yap</button>
+</div>
+  <div id="app" style="display:none;">
+   </div> 
 <div id="app">
+
+  <script>
+
+const SUPABASE_URL = "https://heympechtvitgcouzelm.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhleW1wZWNodHZpdGdjb3V6ZWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1ODIzNTgsImV4cCI6MjA4NzE1ODM1OH0.39HTPMgdu3FT8jmcQqmum3pvY6sWzLLvwWnhuY4pU-Q";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+checkAuth();
+
+async function checkAuth(){
+  const { data } = await supabase.auth.getSession();
+
+  if(data.session){
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    localStorage.setItem("token", data.session.access_token);
+  }
+}
+
+async function login(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    alert("Hatalı giriş");
+    return;
+  }
+
+  localStorage.setItem("token", data.session.access_token);
+  location.reload();
+}
+
+async function logout(){
+  await supabase.auth.signOut();
+  localStorage.removeItem("token");
+  location.reload();
+}
+
+</script>
+  </body>
 
   <!-- TOPBAR -->
   <div class="topbar">
