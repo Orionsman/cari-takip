@@ -426,6 +426,29 @@ async function logout(){
   </div>
 </div>
 
+  <script>
+
+// Orijinal fetch'i sakla
+const originalFetch = window.fetch;
+
+// Yeni fetch tanımı
+window.fetch = function(url, options = {}) {
+
+  const token = localStorage.getItem("token");
+
+  // options yoksa oluştur
+  if (!options.headers) {
+    options.headers = {};
+  }
+
+  // Token varsa ekle
+  if (token) {
+    options.headers["Authorization"] = "Bearer " + token;
+  }
+
+  return originalFetch(url, options);
+};
+
 <script>
 // ── State ──────────────────────────────────────────────────────────────────────
 let state = {
