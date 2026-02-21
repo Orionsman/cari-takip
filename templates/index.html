@@ -277,9 +277,19 @@
       <h3>◈ Cari Takip</h3>
       <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir" style="background:var(--card2);border:none;color:var(--text);border-radius:8px;padding:7px 10px;font-size:16px;cursor:pointer">🌙</button>
     </div>
-    <input id="email" type="email" placeholder="E-posta">
-    <input id="password" type="password" placeholder="Şifre">
-    <button onclick="login()">Giriş Yap</button>
+    <form onsubmit="event.preventDefault();login()" novalidate>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <label for="email" style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--sub);font-weight:500">
+          E-posta
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="ornek@mail.com">
+        </label>
+        <label for="password" style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--sub);font-weight:500">
+          Şifre
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••">
+        </label>
+        <button type="submit">Giriş Yap</button>
+      </div>
+    </form>
   </div>
 
   <!-- ── ANA UYGULAMA ── -->
@@ -336,26 +346,26 @@
       <div class="form-card">
         <div class="form-title">Yeni Satış</div>
         <div class="form-row">
-          <div class="field"><label>Cari</label>
-            <select id="st-cari"></select></div>
+          <div class="field"><label for="st-cari">Cari</label>
+            <select id="st-cari" name="st-cari"></select></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Ürün</label>
-            <select id="st-urun" onchange="urunSecildi()"></select></div>
+          <div class="field"><label for="st-urun">Ürün</label>
+            <select id="st-urun" name="st-urun" onchange="urunSecildi()"></select></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Adet</label>
-            <input type="number" id="st-adet" value="1" min="0.01" step="any"></div>
-          <div class="field"><label>Birim Fiyat ₺</label>
-            <input type="number" id="st-fiyat" value="0" min="0" step="any"></div>
+          <div class="field"><label for="st-adet">Adet</label>
+            <input type="number" id="st-adet" name="st-adet" value="1" min="0.01" step="any" autocomplete="off"></div>
+          <div class="field"><label for="st-fiyat">Birim Fiyat ₺</label>
+            <input type="number" id="st-fiyat" name="st-fiyat" value="0" min="0" step="any" autocomplete="off"></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Tarih</label>
-            <input type="date" id="st-tarih"></div>
+          <div class="field"><label for="st-tarih">Tarih</label>
+          <input type="date" id="st-tarih" name="st-tarih" autocomplete="off"></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Açıklama</label>
-            <input type="text" id="st-acik" placeholder="İsteğe bağlı"></div>
+          <div class="field"><label for="st-acik">Açıklama</label>
+          <input type="text" id="st-acik" name="st-acik" placeholder="İsteğe bağlı"></div>
         </div>
         <div class="form-row">
           <button class="btn btn-green" style="width:100%" onclick="satisKaydet()">🛒 Satışı Kaydet</button>
@@ -372,25 +382,25 @@
       <div class="form-card">
         <div class="form-title">Yeni Ödeme</div>
         <div class="form-row">
-          <div class="field"><label>Cari</label>
-            <select id="od-cari"></select></div>
+          <div class="field"><label for="od-cari">Cari</label>
+          <select id="od-cari" name="od-cari"></select></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Tutar ₺</label>
-            <input type="number" id="od-tutar" value="0" min="0" step="any"></div>
-          <div class="field"><label>Yöntem</label>
-            <select id="od-yontem">
+          <div class="field"><label for="od-tutar">Tutar ₺</label>
+          <input type="number" id="od-tutar" name="od-tutar" value="0" min="0" step="any"></div>
+          <div class="field"><label for="od-yontem">Yöntem</label>
+          <select id="od-yontem" name="od-yontem">
               <option>Nakit</option><option>Havale/EFT</option>
               <option>Çek</option><option>Kredi Kartı</option><option>Diğer</option>
             </select></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Tarih</label>
-            <input type="date" id="od-tarih"></div>
+          <div class="field"><label for="od-tarih">Tarih</label>
+          <input type="date" id="od-tarih" name="od-tarih" autocomplete="off"></div>
         </div>
         <div class="form-row">
-          <div class="field"><label>Açıklama</label>
-            <input type="text" id="od-acik" placeholder="İsteğe bağlı"></div>
+          <div class="field"><label for="od-acik">Açıklama</label>
+          <input type="text" id="od-acik" name="od-acik" placeholder="İsteğe bağlı"></div>
         </div>
         <div class="form-row">
           <button class="btn btn-primary" style="width:100%" onclick="odemeKaydet()">💰 Ödemeyi Kaydet</button>
@@ -427,14 +437,14 @@
     <div class="modal">
       <div class="modal-title" id="modal-cari-title">Yeni Cari</div>
       <input type="hidden" id="mc-id">
-      <div class="field" style="margin-bottom:10px"><label>Firma Adı *</label><input type="text" id="mc-firma"></div>
-      <div class="field" style="margin-bottom:10px"><label>Yetkili</label><input type="text" id="mc-yetkili"></div>
+      <div class="field" style="margin-bottom:10px"><label for="mc-firma">Firma Adı *</label><input type="text" id="mc-firma" name="mc-firma" autocomplete="organization"></div>
+      <div class="field" style="margin-bottom:10px"><label for="mc-yetkili">Yetkili</label><input type="text" id="mc-yetkili" name="mc-yetkili" autocomplete="name"></div>
       <div class="form-row">
-        <div class="field"><label>Telefon</label><input type="tel" id="mc-tel"></div>
-        <div class="field"><label>E-posta</label><input type="email" id="mc-email"></div>
+        <div class="field"><label for="mc-tel">Telefon</label><input type="tel" id="mc-tel" name="mc-tel" autocomplete="tel"></div>
+        <div class="field"><label for="mc-email">E-posta</label><input type="email" id="mc-email" name="mc-email" autocomplete="email"></div>
       </div>
-      <div class="field" style="margin:10px 0"><label>Adres</label><input type="text" id="mc-adres"></div>
-      <div class="field" style="margin-bottom:10px"><label>Notlar</label><input type="text" id="mc-notlar"></div>
+      <div class="field" style="margin:10px 0"><label for="mc-adres">Adres</label><input type="text" id="mc-adres" name="mc-adres" autocomplete="street-address"></div>
+      <div class="field" style="margin-bottom:10px"><label for="mc-notlar">Notlar</label><input type="text" id="mc-notlar" name="mc-notlar" autocomplete="off"></div>
       <div class="modal-btns">
         <button class="btn btn-ghost" onclick="closeModal('modal-cari')">İptal</button>
         <button class="btn btn-primary" onclick="cariKaydet()">Kaydet</button>
@@ -447,11 +457,11 @@
     <div class="modal">
       <div class="modal-title" id="modal-urun-title">Yeni Ürün</div>
       <input type="hidden" id="mu-id">
-      <div class="field" style="margin-bottom:10px"><label>Ürün Adı *</label><input type="text" id="mu-ad"></div>
+      <div class="field" style="margin-bottom:10px"><label for="mu-ad">Ürün Adı *</label><input type="text" id="mu-ad" name="mu-ad" autocomplete="off"></div>
       <div class="form-row">
-        <div class="field"><label>Kod</label><input type="text" id="mu-kod"></div>
-        <div class="field"><label>Birim</label>
-          <select id="mu-birim">
+        <div class="field"><label for="mu-kod">Kod</label><input type="text" id="mu-kod" name="mu-kod" autocomplete="off"></div>
+        <div class="field"><label for="mu-birim">Birim</label>
+          <select id="mu-birim" name="mu-birim">
             <option>Adet</option><option>Kg</option><option>Lt</option>
             <option>Mt</option><option>Kutu</option><option>Paket</option>
             <option>Ton</option><option>m²</option>
@@ -459,10 +469,10 @@
         </div>
       </div>
       <div class="form-row" style="margin-top:10px">
-        <div class="field"><label>Fiyat ₺</label><input type="number" id="mu-fiyat" value="0" step="any"></div>
-        <div class="field"><label>Stok</label><input type="number" id="mu-stok" value="0" step="any"></div>
+        <div class="field"><label for="mu-fiyat">Fiyat ₺</label><input type="number" id="mu-fiyat" name="mu-fiyat" value="0" step="any" autocomplete="off"></div>
+        <div class="field"><label for="mu-stok">Stok</label><input type="number" id="mu-stok" name="mu-stok" value="0" step="any" autocomplete="off"></div>
       </div>
-      <div class="field" style="margin:10px 0"><label>Notlar</label><input type="text" id="mu-notlar"></div>
+      <div class="field" style="margin:10px 0"><label for="mu-notlar">Notlar</label><input type="text" id="mu-notlar" name="mu-notlar" autocomplete="off"></div>
       <div class="modal-btns">
         <button class="btn btn-ghost" onclick="closeModal('modal-urun')">İptal</button>
         <button class="btn btn-green" onclick="urunKaydet()">Kaydet</button>
@@ -474,11 +484,11 @@
   <div class="modal-overlay" id="modal-hareket">
     <div class="modal">
       <div class="modal-title">Manuel Hareket</div>
-      <div class="field" style="margin-bottom:10px"><label>Tarih</label><input type="date" id="mh-tarih"></div>
-      <div class="field" style="margin-bottom:10px"><label>Açıklama</label><input type="text" id="mh-acik"></div>
+      <div class="field" style="margin-bottom:10px"><label for="mh-tarih">Tarih</label><input type="date" id="mh-tarih" name="mh-tarih" autocomplete="off"></div>
+      <div class="field" style="margin-bottom:10px"><label for="mh-acik">Açıklama</label><input type="text" id="mh-acik" name="mh-acik" autocomplete="off"></div>
       <div class="form-row">
-        <div class="field"><label>Borç ₺</label><input type="number" id="mh-borc" value="0" step="any"></div>
-        <div class="field"><label>Alacak ₺</label><input type="number" id="mh-alacak" value="0" step="any"></div>
+        <div class="field"><label for="mh-borc">Borç ₺</label><input type="number" id="mh-borc" name="mh-borc" value="0" step="any" autocomplete="off"></div>
+        <div class="field"><label for="mh-alacak">Alacak ₺</label><input type="number" id="mh-alacak" name="mh-alacak" value="0" step="any" autocomplete="off"></div>
       </div>
       <div class="modal-btns">
         <button class="btn btn-ghost" onclick="closeModal('modal-hareket')">İptal</button>
@@ -717,7 +727,7 @@
               <span class="tag tag-${h.tur}" style="margin-left:6px">${h.tur}</span>
             </div>
             <div style="display:flex;align-items:center;gap:8px">
-              <span class="hareket-bakiye">Bakiye: ${fmt(h.bakiye)}</span>
+              <span class="hareket-bakiye">Bkye: ${fmt(h.bakiye)}</span>
             </div>
           </div>
         </div>`).join('');
