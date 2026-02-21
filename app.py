@@ -6,8 +6,10 @@ PostgreSQL Production Version
 from flask import Flask, render_template, request, jsonify, send_from_directory, jsonify
 import os
 import psycopg2
+import jwt
 from psycopg2 import errors
 from functools import wraps
+
 
 
 # 🔽 BACKUP IMPORTLARI
