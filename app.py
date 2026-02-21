@@ -181,6 +181,7 @@ def upload_to_supabase(filename, path):
 
 
 @app.route("/backup-now")
+@token_required
 def manual_backup():
     try:
         if not SUPABASE_URL or not SUPABASE_KEY:
@@ -202,10 +203,12 @@ def manual_backup():
 # ───────────────────────────────────────────────────────
 
 @app.route("/manifest.json")
+@token_required
 def manifest():
     return send_from_directory("static", "manifest.json")
 
 @app.route("/sw.js")
+@token_required
 def sw():
     resp = send_from_directory("static", "sw.js")
     resp.headers["Service-Worker-Allowed"] = "/"
@@ -217,6 +220,7 @@ def index():
     return render_template("index.html")
 
 @app.route("/restore/<filename>")
+@token_required    
 def restore_backup(filename):
     try:
         if not SUPABASE_URL or not SUPABASE_KEY:
@@ -265,6 +269,7 @@ def restore_backup(filename):
         return jsonify({"error": str(e)}), 500
 
 @app.route("/backups")
+@token_required
 def list_backups():
     return "BACKUPS V2 CALISIYOR"
 
