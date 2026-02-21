@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" data-theme="dark">
 <head>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <meta charset="UTF-8">
@@ -13,8 +13,15 @@
   <title>Cari Hesap Takip</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <script>
+    // Tema flash önleme - DOM yüklenmeden önce uygula
+    (function() {
+      var t = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <style>
-    /* ── Değişkenler ── */
+    /* ── Değişkenler - Koyu Tema (varsayılan) ── */
     :root {
       --bg:      #0d0f18;
       --panel:   #161924;
@@ -32,6 +39,25 @@
       --serif:   'DM Serif Display', serif;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
+
+    /* ── Açık Tema ── */
+    [data-theme="light"] {
+      --bg:      #f0f2f8;
+      --panel:   #ffffff;
+      --card:    #ffffff;
+      --card2:   #e8ecf5;
+      --accent:  #3b6ef0;
+      --green:   #18a870;
+      --orange:  #d4820a;
+      --red:     #d94040;
+      --text:    #1a1f36;
+      --sub:     #6b7494;
+      --border:  #d0d5e8;
+    }
+    [data-theme="light"] .field input,
+    [data-theme="light"] .field select { background: #f0f2f8; }
+    [data-theme="light"] .search-box input { background: transparent; }
+    [data-theme="light"] #login-screen { box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
 
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
@@ -87,6 +113,10 @@
     .topbar-title { font-family: var(--serif); font-size: 18px; color: var(--accent); }
     .topbar-sub { font-size: 10px; color: var(--sub); margin-top: 2px; }
     .topbar-btn { background: var(--card2); border: none; color: var(--text); border-radius: 8px; padding: 7px 12px; font-family: var(--font); font-size: 12px; cursor: pointer; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .theme-btn { background: var(--card2); border: none; color: var(--text); border-radius: 8px; padding: 7px 10px; font-size: 16px; cursor: pointer; line-height: 1; }
+    .logout-btn { background: transparent; border: 1px solid var(--border); color: var(--sub); border-radius: 8px; padding: 6px 10px; font-family: var(--font); font-size: 11px; cursor: pointer; }
+    .logout-btn:hover { border-color: var(--red); color: var(--red); }
 
     /* ── Bottom Nav ── */
     .bottom-nav {
@@ -240,7 +270,10 @@
 
   <!-- ── GİRİŞ EKRANI ── -->
   <div id="login-screen" style="display:none;">
-    <h3>◈ Cari Takip</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3>◈ Cari Takip</h3>
+      <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir" style="background:var(--card2);border:none;color:var(--text);border-radius:8px;padding:7px 10px;font-size:16px;cursor:pointer">🌙</button>
+    </div>
     <input id="email" type="email" placeholder="E-posta">
     <input id="password" type="password" placeholder="Şifre">
     <button onclick="login()">Giriş Yap</button>
@@ -255,7 +288,11 @@
         <div class="topbar-title">◈ Cari Takip</div>
         <div class="topbar-sub" id="topbar-sub">Yükleniyor...</div>
       </div>
-      <button class="topbar-btn" id="topbar-action-btn" onclick="topbarAction()">+ Ekle</button>
+      <div class="topbar-right">
+        <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir">🌙</button>
+        <button class="topbar-btn" id="topbar-action-btn" onclick="topbarAction()">+ Ekle</button>
+        <button class="logout-btn" onclick="logout()">Çıkış</button>
+      </div>
     </div>
 
     <!-- ── PAGE: CARİLER ── -->
@@ -478,9 +515,10 @@
     }
 
     async function logout() {
+      if (!confirm('Çıkış yapmak istediğinize emin misiniz?')) return;
       await sb.auth.signOut();
       localStorage.removeItem("token");
-      checkAuth();
+      location.reload();
     }
 
     // Token'ı tüm fetch isteklerine otomatik ekle - SAYFA YÜKLENİRKEN BİR KEZ ÇALIŞIR
@@ -497,6 +535,27 @@
     };
 
     function injectAuthHeader() { /* artık gerekmiyor, override baştan yapıldı */ }
+
+    // ── Tema ──────────────────────────────────────────────────────────────────
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isLight = html.getAttribute('data-theme') === 'light';
+      const newTheme = isLight ? 'dark' : 'light';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      document.getElementById('theme-btn').textContent = newTheme === 'light' ? '🌙' : '☀️';
+      // Meta theme-color güncelle
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.content = newTheme === 'light' ? '#ffffff' : '#0f1117';
+    }
+
+    function applyTheme() {
+      const saved = localStorage.getItem('theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', saved);
+      const btn = document.getElementById('theme-btn');
+      if (btn) btn.textContent = saved === 'light' ? '☀️' : '🌙';
+    }
+
 
     // ── State ─────────────────────────────────────────────────────────────────
     let state = {
@@ -648,7 +707,6 @@
             </div>
             <div style="display:flex;align-items:center;gap:8px">
               <span class="hareket-bakiye">Bkye: ${fmt(h.bakiye)}</span>
-              <span onclick="hareketSil(${h.id})" style="color:var(--red);cursor:pointer;font-size:18px">×</span>
             </div>
           </div>
         </div>`).join('');
