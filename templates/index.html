@@ -318,7 +318,10 @@
       </div>
       <div class="section-header">
         <span class="section-title">Hareketler</span>
-        <button class="btn btn-ghost btn-sm" onclick="openHareket()">+ Hareket</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="pdfIndir()" style="color:var(--accent)">📄 PDF</button>
+          <button class="btn btn-ghost btn-sm" onclick="openHareket()">+ Hareket</button>
+        </div>
       </div>
       <div id="hareket-list" class="list-container"></div>
     </div>
@@ -718,6 +721,155 @@
             </div>
           </div>
         </div>`).join('');
+    }
+
+    // ── PDF İndir ──────────────────────────────────────────────────────────────
+    function pdfIndir() {
+      const c = state.selectedCari;
+      const hareketler = state.hareketler;
+      if (!c) return;
+
+      const fmtT = t => { if(!t) return '-'; const [y,m,d]=t.split('-'); return d&&m&&y?d+'.'+m+'.'+y:t; };
+      const fmtN = n => Number(n||0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₺';
+
+      // Özet hesapla
+      let toplamBorc = 0, toplamAlacak = 0;
+      hareketler.forEach(h => { toplamBorc += Number(h.borc||0); toplamAlacak += Number(h.alacak||0); });
+      const bakiye = toplamBorc - toplamAlacak;
+
+      // Hareket satırları
+      let bakiyeAkis = 0;
+      const satirlar = [...hareketler].map(h => {
+        bakiyeAkis += Number(h.borc||0) - Number(h.alacak||0);
+        const tip = h.borc > 0 ? 'borc' : 'alacak';
+        return `<tr>
+          <td>${fmtT(h.tarih)}</td>
+          <td>${h.aciklama || '-'}</td>
+          <td style="text-align:right;color:#c0392b;font-weight:600">${h.borc > 0 ? fmtN(h.borc) : ''}</td>
+          <td style="text-align:right;color:#27ae60;font-weight:600">${h.alacak > 0 ? fmtN(h.alacak) : ''}</td>
+          <td style="text-align:right;font-weight:700;color:${bakiyeAkis>=0?'#c0392b':'#27ae60'}">${fmtN(Math.abs(bakiyeAkis))}</td>
+        </tr>`;
+      }).join('');
+
+      const bakiyeRenk = bakiye > 0 ? '#c0392b' : '#27ae60';
+      const bakiyeMetin = bakiye > 0 ? 'Borçlu' : (bakiye < 0 ? 'Alacaklı' : 'Bakiyesiz');
+
+      const html = `<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Ekstre - ${c.firma_adi}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #222; background: #fff; padding: 32px; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 2px solid #2c3e8c; }
+  .sirket-adi { font-size: 22px; font-weight: 800; color: #2c3e8c; letter-spacing: -0.5px; }
+  .ekstre-baslik { font-size: 14px; font-weight: 700; color: #555; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .tarih-bilgi { text-align: right; font-size: 11px; color: #666; line-height: 1.8; }
+  .cari-bilgi { background: #f4f6fb; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+  .cari-adi { font-size: 18px; font-weight: 800; color: #1a1f36; }
+  .cari-detay { font-size: 11px; color: #666; margin-top: 4px; line-height: 1.7; }
+  .ozet { display: flex; gap: 12px; margin-bottom: 24px; }
+  .ozet-kart { flex: 1; padding: 14px 16px; border-radius: 10px; text-align: center; }
+  .ozet-kart.borc { background: #fef2f2; border: 1px solid #fecaca; }
+  .ozet-kart.alacak { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .ozet-kart.bakiye { border: 2px solid; }
+  .ozet-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; color: #888; margin-bottom: 6px; }
+  .ozet-deger { font-size: 16px; font-weight: 800; }
+  .ozet-kart.borc .ozet-deger { color: #c0392b; }
+  .ozet-kart.alacak .ozet-deger { color: #27ae60; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: #2c3e8c; color: #fff; }
+  thead th { padding: 10px 12px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; }
+  thead th:nth-child(3), thead th:nth-child(4), thead th:nth-child(5) { text-align: right; }
+  tbody tr { border-bottom: 1px solid #eee; }
+  tbody tr:nth-child(even) { background: #f8f9fc; }
+  tbody td { padding: 9px 12px; vertical-align: middle; }
+  tfoot tr { background: #f0f2f8; font-weight: 700; }
+  tfoot td { padding: 11px 12px; font-size: 12px; border-top: 2px solid #2c3e8c; }
+  .footer { margin-top: 28px; padding-top: 14px; border-top: 1px solid #ddd; display: flex; justify-content: space-between; font-size: 10px; color: #999; }
+  @media print {
+    body { padding: 16px; }
+    @page { margin: 1.5cm; size: A4; }
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="sirket-adi">◈ Cari Takip</div>
+      <div class="ekstre-baslik">Hesap Ekstresi</div>
+    </div>
+    <div class="tarih-bilgi">
+      <strong>Belge Tarihi:</strong> ${new Date().toLocaleDateString('tr-TR')}<br>
+      <strong>Saat:</strong> ${new Date().toLocaleTimeString('tr-TR', {hour:'2-digit',minute:'2-digit'})}
+    </div>
+  </div>
+
+  <div class="cari-bilgi">
+    <div>
+      <div class="cari-adi">${c.firma_adi}</div>
+      <div class="cari-detay">
+        ${c.yetkili ? '👤 ' + c.yetkili + '&nbsp;&nbsp;' : ''}
+        ${c.telefon ? '📞 ' + c.telefon + '&nbsp;&nbsp;' : ''}
+        ${c.email   ? '✉ '  + c.email   : ''}
+        ${c.adres   ? '<br>📍 ' + c.adres : ''}
+      </div>
+    </div>
+    <div style="text-align:right;font-size:13px;font-weight:800;color:${bakiyeRenk}">
+      ${bakiyeMetin}<br>
+      <span style="font-size:20px">${fmtN(Math.abs(bakiye))}</span>
+    </div>
+  </div>
+
+  <div class="ozet">
+    <div class="ozet-kart borc">
+      <div class="ozet-label">Toplam Borç</div>
+      <div class="ozet-deger">${fmtN(toplamBorc)}</div>
+    </div>
+    <div class="ozet-kart alacak">
+      <div class="ozet-label">Toplam Alacak</div>
+      <div class="ozet-deger">${fmtN(toplamAlacak)}</div>
+    </div>
+    <div class="ozet-kart bakiye" style="border-color:${bakiyeRenk};background:${bakiye>=0?'#fef2f2':'#f0fdf4'}">
+      <div class="ozet-label">Net Bakiye</div>
+      <div class="ozet-deger" style="color:${bakiyeRenk}">${fmtN(Math.abs(bakiye))}</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Tarih</th>
+        <th>Açıklama</th>
+        <th>Borç</th>
+        <th>Alacak</th>
+        <th>Bakiye</th>
+      </tr>
+    </thead>
+    <tbody>${satirlar || '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999">Hareket bulunamadı</td></tr>'}</tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2">TOPLAM</td>
+        <td style="text-align:right;color:#c0392b">${fmtN(toplamBorc)}</td>
+        <td style="text-align:right;color:#27ae60">${fmtN(toplamAlacak)}</td>
+        <td style="text-align:right;color:${bakiyeRenk}">${fmtN(Math.abs(bakiye))}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div class="footer">
+    <span>Bu belge Cari Takip sistemi tarafından oluşturulmuştur.</span>
+    <span>${c.firma_adi} · ${new Date().toLocaleDateString('tr-TR')}</span>
+  </div>
+
+  <script>window.onload = () => window.print();<\/script>
+</body>
+</html>`;
+
+      const win = window.open('', '_blank');
+      win.document.write(html);
+      win.document.close();
     }
 
     function openCariModal(c) {
