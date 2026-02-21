@@ -3,10 +3,12 @@ Cari Hesap Takip - PWA / Bulut Sürümü
 PostgreSQL Production Version
 """
 
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory, jsonify
 import os
 import psycopg2
 from psycopg2 import errors
+from functools import wraps
+
 
 # 🔽 BACKUP IMPORTLARI
 import subprocess
@@ -18,9 +20,33 @@ app = Flask(__name__)
 DATABASE_URL = os.environ.get("DATABASE_URL")
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET")
 
 PORT = int(os.environ.get("PORT", 5000))
 BUCKET = "db-backups"
+
+# ───────────────────────────────────────────────────────
+# GİRİŞ
+# ───────────────────────────────────────────────────────
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get("Authorization")
+
+        if not auth_header:
+            return jsonify({"error": "Token yok"}), 401
+
+        try:
+            token = auth_header.split(" ")[1]
+            jwt.decode(token, SUPABASE_JWT_SECRET, algorithms=["HS256"])
+        except Exception:
+            return jsonify({"error": "Geçersiz token"}), 401
+
+        return f(*args, **kwargs)
+
+    return decorated
+
 
 # ───────────────────────────────────────────────────────
 # VERİTABANI
@@ -336,6 +362,7 @@ def api_cari_ozet(cid):
 # ───────────────────────────────────────────────────────
 
 @app.route("/api/hareketler/<int:cid>")
+@token_required
 def api_hareketler(cid):
     with get_db() as conn:
         cur = conn.cursor()
@@ -356,6 +383,7 @@ def api_hareketler(cid):
     return jsonify(result)
 
 @app.route("/api/hareketler", methods=["POST"])
+@token_required
 def api_hareket_ekle():
     d = request.json
     with get_db() as conn:
@@ -374,6 +402,7 @@ def api_hareket_ekle():
     return jsonify({"ok": True})
 
 @app.route("/api/hareketler/<int:hid>", methods=["DELETE"])
+@token_required
 def api_hareket_sil(hid):
     with get_db() as conn:
         cur = conn.cursor()
@@ -385,6 +414,7 @@ def api_hareket_sil(hid):
 # ───────────────────────────────────────────────────────
 
 @app.route("/api/urunler")
+@token_required
 def api_urunler():
     with get_db() as conn:
         cur = conn.cursor()
@@ -393,6 +423,7 @@ def api_urunler():
     return jsonify(rows)
 
 @app.route("/api/urunler", methods=["POST"])
+@token_required
 def api_urun_ekle():
     d = request.json
     with get_db() as conn:
@@ -412,6 +443,7 @@ def api_urun_ekle():
     return jsonify({"ok": True})
 
 @app.route("/api/urunler/<int:uid>", methods=["PUT"])
+@token_required
 def api_urun_guncelle(uid):
     d = request.json
     with get_db() as conn:
@@ -432,6 +464,7 @@ def api_urun_guncelle(uid):
     return jsonify({"ok": True})
 
 @app.route("/api/urunler/<int:uid>", methods=["DELETE"])
+@token_required
 def api_urun_sil(uid):
     try:
         with get_db() as conn:
@@ -446,6 +479,7 @@ def api_urun_sil(uid):
 # ───────────────────────────────────────────────────────
 
 @app.route("/api/satislar")
+@token_required
 def api_satislar():
     with get_db() as conn:
         cur = conn.cursor()
@@ -460,6 +494,7 @@ def api_satislar():
     return jsonify(rows)
 
 @app.route("/api/satislar", methods=["POST"])
+@token_required
 def api_satis_ekle():
     d = request.json
     adet = float(d["adet"])
@@ -500,6 +535,7 @@ def api_satis_ekle():
     return jsonify({"ok": True, "toplam": toplam})
 
 @app.route("/api/satislar/<int:sid>", methods=["DELETE"])
+@token_required
 def api_satis_sil(sid):
     with get_db() as conn:
         cur = conn.cursor()
@@ -521,6 +557,7 @@ def api_satis_sil(sid):
 # ───────────────────────────────────────────────────────
 
 @app.route("/api/odemeler")
+@token_required
 def api_odemeler():
     with get_db() as conn:
         cur = conn.cursor()
@@ -534,6 +571,7 @@ def api_odemeler():
     return jsonify(rows)
 
 @app.route("/api/odemeler", methods=["POST"])
+@token_required
 def api_odeme_ekle():
     d = request.json
     tutar = float(d["tutar"])
@@ -570,6 +608,7 @@ def api_odeme_ekle():
     return jsonify({"ok": True})
 
 @app.route("/api/odemeler/<int:oid>", methods=["DELETE"])
+@token_required
 def api_odeme_sil(oid):
     with get_db() as conn:
         cur = conn.cursor()
