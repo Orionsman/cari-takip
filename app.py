@@ -41,9 +41,15 @@ def token_required(f):
 
         try:
             token = auth_header.split(" ")[1]
-            jwt.decode(token, SUPABASE_JWT_SECRET, algorithms=["HS256"])
-        except Exception:
-            return jsonify({"error": "Geçersiz token"}), 401
+            jwt.decode(
+                token,
+                SUPABASE_JWT_SECRET,
+                algorithms=["HS256"],
+                options={"verify_aud": False}  # Supabase audience kontrolunu atla
+            )
+        except Exception as e:
+            print(f"JWT HATA: {e}")  # Railway loglarinda gorunur
+            return jsonify({"error": "Geçersiz token", "detail": str(e)}), 401
 
         return f(*args, **kwargs)
 
@@ -67,9 +73,9 @@ def rows_to_dicts(cur):
     return [dict(zip(cols, row)) for row in cur.fetchall()]
 
 def init_db():
-    with get_db() as conn:
-        cur = conn.cursor()
-        cur.execute("""
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("""
             CREATE TABLE IF NOT EXISTS cariler (
                 id SERIAL PRIMARY KEY,
                 firma_adi TEXT NOT NULL,
@@ -121,6 +127,7 @@ def init_db():
                 aciklama TEXT
             );
         """)
+    conn.close()
 
 # ───────────────────────────────────────────────────────
 # 🔒 BACKUP SİSTEMİ (Supabase Storage)
@@ -641,7 +648,13 @@ def api_odeme_sil(oid):
 # BAŞLAT
 # ───────────────────────────────────────────────────────
 
-if __name__ == "__main__":
+# Gunicorn veya direkt python ile baslatilsin - tablolari her zaman olustur
+try:
     init_db()
-    print(f"✓ Sunucu başlatıldı → http://localhost:{PORT}")
+    print("✓ Veritabani tablolari hazir")
+except Exception as e:
+    print(f"⚠ init_db hatasi: {e}")
+
+if __name__ == "__main__":
+    print(f"✓ Sunucu baslatildi → http://localhost:{PORT}")
     app.run(host="0.0.0.0", port=PORT, debug=False)
