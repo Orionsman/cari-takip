@@ -8,7 +8,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Cari Takip">
+  <meta name="apple-mobile-web-app-title" content="Ekleristan">
   <link rel="manifest" href="/static/manifest.json">
   <title>Cari Hesap Takip</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -274,7 +274,13 @@
   <!-- ── GİRİŞ EKRANI ── -->
   <div id="login-screen" style="display:none;">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <h3>◈ Cari Takip</h3>
+      <h3> style="display: flex; align-items: center; gap: 12px; font-family: var(--serif); color: var(--text);">
+    <svg width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.4));">
+        <rect x="8" y="26" width="48" height="16" rx="8" fill="#D2691E"/>
+        <rect x="10" y="23" width="44" height="12" rx="6" fill="#3D1F1F"/>
+        <path d="M18 23L24 35M28 23L34 35M38 23L44 35" stroke="#FF69B4" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="48" cy="28" r="2.5" fill="white" fill-opacity="0.6"/>
+    </svg> Ekleristan</h3>
       <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Tema değiştir" style="background:var(--card2);border:none;color:var(--text);border-radius:8px;padding:7px 10px;font-size:16px;cursor:pointer">🌙</button>
     </div>
     <form onsubmit="event.preventDefault();login()" novalidate>
@@ -298,7 +304,13 @@
     <!-- TOPBAR -->
     <div class="topbar">
       <div>
-        <div class="topbar-title">◈ Cari Takip</div>
+        <div class="topbar-title">style="display: flex; align-items: center; gap: 12px; font-family: var(--serif); color: var(--text);">
+    <svg width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.4));">
+        <rect x="8" y="26" width="48" height="16" rx="8" fill="#D2691E"/>
+        <rect x="10" y="23" width="44" height="12" rx="6" fill="#3D1F1F"/>
+        <path d="M18 23L24 35M28 23L34 35M38 23L44 35" stroke="#FF69B4" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="48" cy="28" r="2.5" fill="white" fill-opacity="0.6"/>
+    </svg> Ekleristan</div>
         <div class="topbar-sub" id="topbar-sub">Yükleniyor...</div>
       </div>
       <div class="topbar-right">
@@ -807,7 +819,13 @@
 <body>
   <div class="header">
     <div>
-      <div class="sirket-adi">◈ Cari Takip</div>
+      <div class="sirket-adi">style="display: flex; align-items: center; gap: 12px; font-family: var(--serif); color: var(--text);">
+    <svg width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 3px 5px rgba(0,0,0,0.4));">
+        <rect x="8" y="26" width="48" height="16" rx="8" fill="#D2691E"/>
+        <rect x="10" y="23" width="44" height="12" rx="6" fill="#3D1F1F"/>
+        <path d="M18 23L24 35M28 23L34 35M38 23L44 35" stroke="#FF69B4" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="48" cy="28" r="2.5" fill="white" fill-opacity="0.6"/>
+    </svg> Ekleristan</div>
       <div class="ekstre-baslik">Hesap Ekstresi</div>
     </div>
     <div class="tarih-bilgi">
@@ -869,7 +887,7 @@
   </table>
 
   <div class="footer">
-    <span>Bu belge Cari Takip sistemi tarafından oluşturulmuştur.</span>
+    <span>Bu belge OrionTech sistemi tarafından oluşturulmuştur.</span>
     <span>${c.firma_adi} · ${new Date().toLocaleDateString('tr-TR')}</span>
   </div>
 
