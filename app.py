@@ -36,20 +36,29 @@ def token_required(f):
     def decorated(*args, **kwargs):
         auth_header = request.headers.get("Authorization")
 
-        if not auth_header:
+        if not auth_header or not auth_header.startswith("Bearer "):
             return jsonify({"error": "Token yok"}), 401
 
-        try:
-            token = auth_header.split(" ")[1]
-            jwt.decode(
-                token,
-                SUPABASE_JWT_SECRET,
-                algorithms=["HS256"],
-                options={"verify_aud": False}  # Supabase audience kontrolunu atla
-            )
-        except Exception as e:
-            print(f"JWT HATA: {e}")  # Railway loglarinda gorunur
-            return jsonify({"error": "Geçersiz token", "detail": str(e)}), 401
+        token = auth_header.split(" ")[1]
+        if not token:
+            return jsonify({"error": "Token bos"}), 401
+
+        # SUPABASE_JWT_SECRET varsa dogrula, yoksa sadece token varligini kontrol et
+        if SUPABASE_JWT_SECRET:
+            try:
+                jwt.decode(
+                    token,
+                    SUPABASE_JWT_SECRET,
+                    algorithms=["HS256"],
+                    options={"verify_aud": False, "verify_exp": True}
+                )
+            except jwt.ExpiredSignatureError:
+                return jsonify({"error": "Token suresi dolmus"}), 401
+            except Exception as e:
+                print(f"JWT HATA: {type(e).__name__}: {e}")
+                return jsonify({"error": "Gecersiz token", "detail": str(e)}), 401
+        else:
+            print("UYARI: SUPABASE_JWT_SECRET tanimli degil, token dogrulamasi atlanıyor")
 
         return f(*args, **kwargs)
 
