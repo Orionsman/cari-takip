@@ -1,857 +1,935 @@
 <!DOCTYPE html>
 <html lang="tr">
-<head><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0f1117">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Cari Takip">
-<link rel="manifest" href="/static/manifest.json">
-<title>Cari Hesap Takip</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
-<style>
-/* ── Değişkenler ── */
-:root {
-  --bg:      #0d0f18;
-  --panel:   #161924;
-  --card:    #1e2235;
-  --card2:   #252a3f;
-  --accent:  #5b8af5;
-  --green:   #34d39a;
-  --orange:  #f5a623;
-  --red:     #f56565;
-  --text:    #e2e8f8;
-  --sub:     #7a82a8;
-  --border:  #2a3050;
-  --radius:  14px;
-  --font:    'DM Mono', monospace;
-  --serif:   'DM Serif Display', serif;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-}
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cari Takip">
+  <link rel="manifest" href="/static/manifest.json">
+  <title>Cari Hesap Takip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    /* ── Değişkenler ── */
+    :root {
+      --bg:      #0d0f18;
+      --panel:   #161924;
+      --card:    #1e2235;
+      --card2:   #252a3f;
+      --accent:  #5b8af5;
+      --green:   #34d39a;
+      --orange:  #f5a623;
+      --red:     #f56565;
+      --text:    #e2e8f8;
+      --sub:     #7a82a8;
+      --border:  #2a3050;
+      --radius:  14px;
+      --font:    'DM Mono', monospace;
+      --serif:   'DM Serif Display', serif;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
 
-/* ── Layout ── */
-#app { display: flex; flex-direction: column; height: 100%; height: 100dvh; }
+    /* ── Login Ekranı ── */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 320px;
+      margin: 80px auto;
+      padding: 28px;
+      background: var(--panel);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+    #login-screen h3 { font-family: var(--serif); font-size: 22px; color: var(--accent); }
+    #login-screen input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      outline: none;
+    }
+    #login-screen input:focus { border-color: var(--accent); }
+    #login-screen button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px;
+      font-family: var(--font);
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    #login-screen button:active { opacity: 0.8; }
 
-/* ── Header ── */
-.topbar {
-  background: var(--panel);
-  padding: 12px 16px 10px;
-  display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-.topbar-title { font-family: var(--serif); font-size: 18px; color: var(--accent); }
-.topbar-sub { font-size: 10px; color: var(--sub); margin-top: 2px; }
-.topbar-btn { background: var(--card2); border: none; color: var(--text); border-radius: 8px; padding: 7px 12px; font-family: var(--font); font-size: 12px; cursor: pointer; }
+    /* ── Layout ── */
+    #app { display: flex; flex-direction: column; height: 100%; height: 100dvh; }
 
-/* ── Bottom Nav ── */
-.bottom-nav {
-  display: flex;
-  background: var(--panel);
-  border-top: 1px solid var(--border);
-  padding-bottom: var(--safe-bottom);
-  flex-shrink: 0;
-}
-.nav-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 10px 4px 8px; border: none; background: transparent;
-  color: var(--sub); font-family: var(--font); font-size: 9px;
-  cursor: pointer; transition: color .2s; gap: 4px;
-}
-.nav-btn .ico { font-size: 20px; }
-.nav-btn.active { color: var(--accent); }
-.nav-btn.active .ico { text-shadow: 0 0 12px var(--accent); }
+    /* ── Header ── */
+    .topbar {
+      background: var(--panel);
+      padding: 12px 16px 10px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .topbar-title { font-family: var(--serif); font-size: 18px; color: var(--accent); }
+    .topbar-sub { font-size: 10px; color: var(--sub); margin-top: 2px; }
+    .topbar-btn { background: var(--card2); border: none; color: var(--text); border-radius: 8px; padding: 7px 12px; font-family: var(--font); font-size: 12px; cursor: pointer; }
 
-/* ── Pages ── */
-.page { display: none; flex: 1; overflow-y: auto; padding: 12px 14px; }
-.page.active { display: flex; flex-direction: column; gap: 12px; }
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      display: flex;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      padding-bottom: var(--safe-bottom);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      padding: 10px 4px 8px; border: none; background: transparent;
+      color: var(--sub); font-family: var(--font); font-size: 9px;
+      cursor: pointer; transition: color .2s; gap: 4px;
+    }
+    .nav-btn .ico { font-size: 20px; }
+    .nav-btn.active { color: var(--accent); }
+    .nav-btn.active .ico { text-shadow: 0 0 12px var(--accent); }
 
-/* ── Cards & Panels ── */
-.card {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 14px;
-  border: 1px solid var(--border);
-}
-.card-title { font-size: 10px; color: var(--sub); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
-.card-value { font-family: var(--serif); font-size: 22px; }
+    /* ── Pages ── */
+    .page { display: none; flex: 1; overflow-y: auto; padding: 12px 14px; }
+    .page.active { display: flex; flex-direction: column; gap: 12px; }
 
-.cards-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.cards-row .card { padding: 12px 10px; }
-.cards-row .card-value { font-size: 15px; }
+    /* ── Cards & Panels ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 14px;
+      border: 1px solid var(--border);
+    }
+    .card-title { font-size: 10px; color: var(--sub); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+    .card-value { font-family: var(--serif); font-size: 22px; }
 
-/* ── Form ── */
-.form-card { background: var(--card); border-radius: var(--radius); padding: 14px; border: 1px solid var(--border); }
-.form-title { font-size: 11px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; font-weight: 500; }
-.form-row { display: flex; gap: 8px; margin-bottom: 10px; }
-.form-row:last-child { margin-bottom: 0; }
-.field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-.field label { font-size: 10px; color: var(--sub); }
-.field input, .field select {
-  background: #0d0f18; border: 1px solid var(--border);
-  border-radius: 8px; padding: 10px 12px;
-  color: var(--text); font-family: var(--font); font-size: 13px;
-  width: 100%; outline: none;
-  -webkit-appearance: none; appearance: none;
-}
-.field input:focus, .field select:focus { border-color: var(--accent); }
-.field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a82a8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+    .cards-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .cards-row .card { padding: 12px 10px; }
+    .cards-row .card-value { font-size: 15px; }
 
-/* ── Buttons ── */
-.btn { border: none; border-radius: 10px; padding: 12px 18px; font-family: var(--font); font-size: 13px; cursor: pointer; font-weight: 500; transition: opacity .15s; }
-.btn:active { opacity: .75; }
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-green   { background: var(--green);  color: #0d1a14; }
-.btn-red     { background: var(--red);    color: #fff; }
-.btn-ghost   { background: var(--card2);  color: var(--text); }
-.btn-sm { padding: 7px 12px; font-size: 11px; border-radius: 8px; }
-.btn-row { display: flex; gap: 8px; }
+    /* ── Form ── */
+    .form-card { background: var(--card); border-radius: var(--radius); padding: 14px; border: 1px solid var(--border); }
+    .form-title { font-size: 11px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; font-weight: 500; }
+    .form-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .form-row:last-child { margin-bottom: 0; }
+    .field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .field label { font-size: 10px; color: var(--sub); }
+    .field input, .field select {
+      background: #0d0f18; border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px;
+      color: var(--text); font-family: var(--font); font-size: 13px;
+      width: 100%; outline: none;
+      -webkit-appearance: none; appearance: none;
+    }
+    .field input:focus, .field select:focus { border-color: var(--accent); }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a82a8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
 
-/* ── Cari Listesi ── */
-.search-box { display: flex; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; }
-.search-box input { background: transparent; border: none; padding: 11px 8px; color: var(--text); font-family: var(--font); font-size: 13px; width: 100%; outline: none; }
-.search-icon { color: var(--sub); font-size: 16px; }
+    /* ── Buttons ── */
+    .btn { border: none; border-radius: 10px; padding: 12px 18px; font-family: var(--font); font-size: 13px; cursor: pointer; font-weight: 500; transition: opacity .15s; }
+    .btn:active { opacity: .75; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-green   { background: var(--green);  color: #0d1a14; }
+    .btn-red     { background: var(--red);    color: #fff; }
+    .btn-ghost   { background: var(--card2);  color: var(--text); }
+    .btn-sm { padding: 7px 12px; font-size: 11px; border-radius: 8px; }
+    .btn-row { display: flex; gap: 8px; }
 
-.list-item {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 13px 14px;
-  display: flex; align-items: center; justify-content: space-between;
-  cursor: pointer; transition: border-color .15s;
-}
-.list-item:active, .list-item.selected { border-color: var(--accent); background: var(--card2); }
-.list-item-main { font-size: 14px; font-weight: 500; }
-.list-item-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
-.list-item-badge { font-size: 11px; font-weight: 500; text-align: right; }
-.badge-red { color: var(--red); }
-.badge-green { color: var(--green); }
+    /* ── Cari Listesi ── */
+    .search-box { display: flex; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0 12px; }
+    .search-box input { background: transparent; border: none; padding: 11px 8px; color: var(--text); font-family: var(--font); font-size: 13px; width: 100%; outline: none; }
+    .search-icon { color: var(--sub); font-size: 16px; }
 
-.list-container { display: flex; flex-direction: column; gap: 8px; }
+    .list-item {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 13px 14px;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; transition: border-color .15s;
+    }
+    .list-item:active, .list-item.selected { border-color: var(--accent); background: var(--card2); }
+    .list-item-main { font-size: 14px; font-weight: 500; }
+    .list-item-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
+    .list-item-badge { font-size: 11px; font-weight: 500; text-align: right; }
+    .badge-red { color: var(--red); }
+    .badge-green { color: var(--green); }
 
-/* ── Hareket Listesi ── */
-.hareket-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; }
-.hareket-top { display: flex; justify-content: space-between; align-items: flex-start; }
-.hareket-aciklama { font-size: 13px; flex: 1; padding-right: 8px; }
-.hareket-tutar { font-size: 13px; font-weight: 500; text-align: right; white-space: nowrap; }
-.hareket-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
-.hareket-meta { font-size: 10px; color: var(--sub); }
-.hareket-bakiye { font-size: 11px; color: var(--sub); }
-.h-borc { color: var(--red); }
-.h-alacak { color: var(--green); }
+    .list-container { display: flex; flex-direction: column; gap: 8px; }
 
-/* ── Tablo (satış/ödeme listesi) ── */
-.tablo-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 13px; }
-.tablo-row1 { display: flex; justify-content: space-between; margin-bottom: 5px; }
-.tablo-firma { font-size: 13px; font-weight: 500; }
-.tablo-tutar { font-size: 14px; font-weight: 500; color: var(--orange); }
-.tablo-row2 { display: flex; justify-content: space-between; }
-.tablo-detail { font-size: 11px; color: var(--sub); }
-.tablo-date { font-size: 11px; color: var(--sub); }
+    /* ── Hareket Listesi ── */
+    .hareket-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; }
+    .hareket-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .hareket-aciklama { font-size: 13px; flex: 1; padding-right: 8px; }
+    .hareket-tutar { font-size: 13px; font-weight: 500; text-align: right; white-space: nowrap; }
+    .hareket-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+    .hareket-meta { font-size: 10px; color: var(--sub); }
+    .hareket-bakiye { font-size: 11px; color: var(--sub); }
+    .h-borc { color: var(--red); }
+    .h-alacak { color: var(--green); }
 
-/* ── Detay sayfası ── */
-.detail-header { background: var(--card); border-radius: var(--radius); padding: 14px; border: 1px solid var(--accent); }
-.detail-firma { font-family: var(--serif); font-size: 20px; color: var(--accent); }
-.detail-info { font-size: 11px; color: var(--sub); margin-top: 4px; line-height: 1.8; }
-.back-btn { display: flex; align-items: center; gap: 6px; color: var(--accent); font-size: 13px; cursor: pointer; padding: 2px 0; }
+    /* ── Tablo (satış/ödeme listesi) ── */
+    .tablo-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 13px; }
+    .tablo-row1 { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .tablo-firma { font-size: 13px; font-weight: 500; }
+    .tablo-tutar { font-size: 14px; font-weight: 500; color: var(--orange); }
+    .tablo-row2 { display: flex; justify-content: space-between; }
+    .tablo-detail { font-size: 11px; color: var(--sub); }
+    .tablo-date { font-size: 11px; color: var(--sub); }
 
-/* ── Modal ── */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity .25s; }
-.modal-overlay.open { opacity: 1; pointer-events: all; }
-.modal { background: var(--panel); border-radius: 20px 20px 0 0; padding: 20px 18px calc(20px + var(--safe-bottom)); width: 100%; max-height: 92vh; overflow-y: auto; transform: translateY(20px); transition: transform .25s; border: 1px solid var(--border); }
-.modal-overlay.open .modal { transform: translateY(0); }
-.modal-title { font-family: var(--serif); font-size: 18px; margin-bottom: 16px; color: var(--text); }
-.modal-btns { display: flex; gap: 10px; margin-top: 16px; }
-.modal-btns .btn { flex: 1; }
+    /* ── Detay sayfası ── */
+    .detail-header { background: var(--card); border-radius: var(--radius); padding: 14px; border: 1px solid var(--accent); }
+    .detail-firma { font-family: var(--serif); font-size: 20px; color: var(--accent); }
+    .detail-info { font-size: 11px; color: var(--sub); margin-top: 4px; line-height: 1.8; }
+    .back-btn { display: flex; align-items: center; gap: 6px; color: var(--accent); font-size: 13px; cursor: pointer; padding: 2px 0; }
 
-/* ── Utilities ── */
-.section-header { display: flex; align-items: center; justify-content: space-between; }
-.section-title { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--sub); }
-.empty { text-align: center; color: var(--sub); padding: 40px 20px; font-size: 13px; }
-.tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 5px; }
-.tag-satis { background: rgba(91,138,245,.15); color: var(--accent); }
-.tag-odeme { background: rgba(52,211,154,.15); color: var(--green); }
-.tag-manuel { background: rgba(122,130,168,.1); color: var(--sub); }
-.divider { height: 1px; background: var(--border); }
-</style>
+    /* ── Modal ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity .25s; }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal { background: var(--panel); border-radius: 20px 20px 0 0; padding: 20px 18px calc(20px + var(--safe-bottom)); width: 100%; max-height: 92vh; overflow-y: auto; transform: translateY(20px); transition: transform .25s; border: 1px solid var(--border); }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal-title { font-family: var(--serif); font-size: 18px; margin-bottom: 16px; color: var(--text); }
+    .modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+    .modal-btns .btn { flex: 1; }
+
+    /* ── Utilities ── */
+    .section-header { display: flex; align-items: center; justify-content: space-between; }
+    .section-title { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--sub); }
+    .empty { text-align: center; color: var(--sub); padding: 40px 20px; font-size: 13px; }
+    .tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 5px; }
+    .tag-satis { background: rgba(91,138,245,.15); color: var(--accent); }
+    .tag-odeme { background: rgba(52,211,154,.15); color: var(--green); }
+    .tag-manuel { background: rgba(122,130,168,.1); color: var(--sub); }
+    .divider { height: 1px; background: var(--border); }
+  </style>
 </head>
 <body>
-  <div id="login-screen" style="display:flex;flex-direction:column;gap:10px;max-width:300px;margin:100px auto;">
-  <h3>Giriş Yap</h3>
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Şifre">
-  <button onclick="login()">Giriş Yap</button>
-</div>
+
+  <!-- ── GİRİŞ EKRANI ── -->
+  <div id="login-screen" style="display:none;">
+    <h3>◈ Cari Takip</h3>
+    <input id="email" type="email" placeholder="E-posta">
+    <input id="password" type="password" placeholder="Şifre">
+    <button onclick="login()">Giriş Yap</button>
+  </div>
+
+  <!-- ── ANA UYGULAMA ── -->
   <div id="app" style="display:none;">
-   </div> 
-<div id="app">
 
-<script>
-const SUPABASE_URL = "https://heympechtvitgcouzelm.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhleW1wZWNodHZpdGdjb3V6ZWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1ODIzNTgsImV4cCI6MjA4NzE1ODM1OH0.39HTPMgdu3FT8jmcQqmum3pvY6sWzLLvwWnhuY4pU-Q";
-
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-}
-async function login(){
-checkAuth();
-
-async function checkAuth(){
-  const { data } = await supabase.auth.getSession();
-
-  if(data.session){
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    localStorage.setItem("token", data.session.access_token);
-  }
-}
-
-async function login(){
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if(error){
-    alert("Hatalı giriş");
-    return;
-  }
-
-  localStorage.setItem("token", data.session.access_token);
-  location.reload();
-}
-
-async function logout(){
-  await supabase.auth.signOut();
-  localStorage.removeItem("token");
-  location.reload();
-}
-
-</script>
-  </body>
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div>
-      <div class="topbar-title">◈ Cari Takip</div>
-      <div class="topbar-sub" id="topbar-sub">Yükleniyor...</div>
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">◈ Cari Takip</div>
+        <div class="topbar-sub" id="topbar-sub">Yükleniyor...</div>
+      </div>
+      <button class="topbar-btn" id="topbar-action-btn" onclick="topbarAction()">+ Ekle</button>
     </div>
-    <button class="topbar-btn" id="topbar-action-btn" onclick="topbarAction()">+ Ekle</button>
+
+    <!-- ── PAGE: CARİLER ── -->
+    <div class="page active" id="page-cariler">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="search" id="cari-search" placeholder="Cari ara..." oninput="filterCariler(this.value)">
+      </div>
+      <div id="cari-list" class="list-container"></div>
+    </div>
+
+    <!-- ── PAGE: CARİ DETAY ── -->
+    <div class="page" id="page-detay">
+      <div class="back-btn" onclick="goBack()">‹ Geri</div>
+      <div class="detail-header" id="detay-header"></div>
+      <div class="cards-row">
+        <div class="card"><div class="card-title">BORÇ</div><div class="card-value badge-red" id="d-borc">0 ₺</div></div>
+        <div class="card"><div class="card-title">ALACAK</div><div class="card-value badge-green" id="d-alacak">0 ₺</div></div>
+        <div class="card"><div class="card-title">BAKİYE</div><div class="card-value" id="d-bakiye">0 ₺</div></div>
+      </div>
+      <div class="section-header">
+        <span class="section-title">Hareketler</span>
+        <button class="btn btn-ghost btn-sm" onclick="openHareket()">+ Hareket</button>
+      </div>
+      <div id="hareket-list" class="list-container"></div>
+    </div>
+
+    <!-- ── PAGE: ÜRÜNLER ── -->
+    <div class="page" id="page-urunler">
+      <div id="urun-list" class="list-container"></div>
+    </div>
+
+    <!-- ── PAGE: SATIŞ ── -->
+    <div class="page" id="page-satis">
+      <div class="form-card">
+        <div class="form-title">Yeni Satış</div>
+        <div class="form-row">
+          <div class="field"><label>Cari</label>
+            <select id="st-cari"></select></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Ürün</label>
+            <select id="st-urun" onchange="urunSecildi()"></select></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Adet</label>
+            <input type="number" id="st-adet" value="1" min="0.01" step="any"></div>
+          <div class="field"><label>Birim Fiyat ₺</label>
+            <input type="number" id="st-fiyat" value="0" min="0" step="any"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Tarih</label>
+            <input type="date" id="st-tarih"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Açıklama</label>
+            <input type="text" id="st-acik" placeholder="İsteğe bağlı"></div>
+        </div>
+        <div class="form-row">
+          <button class="btn btn-green" style="width:100%" onclick="satisKaydet()">🛒 Satışı Kaydet</button>
+        </div>
+      </div>
+      <div class="section-header">
+        <span class="section-title">Satış Geçmişi</span>
+      </div>
+      <div id="satis-list" class="list-container"></div>
+    </div>
+
+    <!-- ── PAGE: ÖDEMELER ── -->
+    <div class="page" id="page-odemeler">
+      <div class="form-card">
+        <div class="form-title">Yeni Ödeme</div>
+        <div class="form-row">
+          <div class="field"><label>Cari</label>
+            <select id="od-cari"></select></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Tutar ₺</label>
+            <input type="number" id="od-tutar" value="0" min="0" step="any"></div>
+          <div class="field"><label>Yöntem</label>
+            <select id="od-yontem">
+              <option>Nakit</option><option>Havale/EFT</option>
+              <option>Çek</option><option>Kredi Kartı</option><option>Diğer</option>
+            </select></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Tarih</label>
+            <input type="date" id="od-tarih"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Açıklama</label>
+            <input type="text" id="od-acik" placeholder="İsteğe bağlı"></div>
+        </div>
+        <div class="form-row">
+          <button class="btn btn-primary" style="width:100%" onclick="odemeKaydet()">💰 Ödemeyi Kaydet</button>
+        </div>
+      </div>
+      <div class="section-header">
+        <span class="section-title">Ödeme Geçmişi</span>
+      </div>
+      <div id="odeme-list" class="list-container"></div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-page="cariler" onclick="navTo('cariler')">
+        <span class="ico">👥</span>Cariler
+      </button>
+      <button class="nav-btn" data-page="urunler" onclick="navTo('urunler')">
+        <span class="ico">📦</span>Ürünler
+      </button>
+      <button class="nav-btn" data-page="satis" onclick="navTo('satis')">
+        <span class="ico">🛒</span>Satış
+      </button>
+      <button class="nav-btn" data-page="odemeler" onclick="navTo('odemeler')">
+        <span class="ico">💰</span>Ödemeler
+      </button>
+    </nav>
+
+  </div><!-- /#app -->
+
+  <!-- ── MODALLER ── -->
+
+  <!-- Cari Ekle/Düzenle -->
+  <div class="modal-overlay" id="modal-cari">
+    <div class="modal">
+      <div class="modal-title" id="modal-cari-title">Yeni Cari</div>
+      <input type="hidden" id="mc-id">
+      <div class="field" style="margin-bottom:10px"><label>Firma Adı *</label><input type="text" id="mc-firma"></div>
+      <div class="field" style="margin-bottom:10px"><label>Yetkili</label><input type="text" id="mc-yetkili"></div>
+      <div class="form-row">
+        <div class="field"><label>Telefon</label><input type="tel" id="mc-tel"></div>
+        <div class="field"><label>E-posta</label><input type="email" id="mc-email"></div>
+      </div>
+      <div class="field" style="margin:10px 0"><label>Adres</label><input type="text" id="mc-adres"></div>
+      <div class="field" style="margin-bottom:10px"><label>Notlar</label><input type="text" id="mc-notlar"></div>
+      <div class="modal-btns">
+        <button class="btn btn-ghost" onclick="closeModal('modal-cari')">İptal</button>
+        <button class="btn btn-primary" onclick="cariKaydet()">Kaydet</button>
+      </div>
+    </div>
   </div>
 
-  <!-- ── PAGE: CARİLER ─────────────────────────────────────────────────── -->
-  <div class="page active" id="page-cariler">
-    <div class="search-box">
-      <span class="search-icon">🔍</span>
-      <input type="search" id="cari-search" placeholder="Cari ara..." oninput="filterCariler(this.value)">
+  <!-- Ürün Ekle/Düzenle -->
+  <div class="modal-overlay" id="modal-urun">
+    <div class="modal">
+      <div class="modal-title" id="modal-urun-title">Yeni Ürün</div>
+      <input type="hidden" id="mu-id">
+      <div class="field" style="margin-bottom:10px"><label>Ürün Adı *</label><input type="text" id="mu-ad"></div>
+      <div class="form-row">
+        <div class="field"><label>Kod</label><input type="text" id="mu-kod"></div>
+        <div class="field"><label>Birim</label>
+          <select id="mu-birim">
+            <option>Adet</option><option>Kg</option><option>Lt</option>
+            <option>Mt</option><option>Kutu</option><option>Paket</option>
+            <option>Ton</option><option>m²</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:10px">
+        <div class="field"><label>Fiyat ₺</label><input type="number" id="mu-fiyat" value="0" step="any"></div>
+        <div class="field"><label>Stok</label><input type="number" id="mu-stok" value="0" step="any"></div>
+      </div>
+      <div class="field" style="margin:10px 0"><label>Notlar</label><input type="text" id="mu-notlar"></div>
+      <div class="modal-btns">
+        <button class="btn btn-ghost" onclick="closeModal('modal-urun')">İptal</button>
+        <button class="btn btn-green" onclick="urunKaydet()">Kaydet</button>
+      </div>
     </div>
-    <div id="cari-list" class="list-container"></div>
   </div>
 
-  <!-- ── PAGE: CARİ DETAY ──────────────────────────────────────────────── -->
-  <div class="page" id="page-detay">
-    <div class="back-btn" onclick="goBack()">‹ Geri</div>
-    <div class="detail-header" id="detay-header"></div>
-    <div class="cards-row">
-      <div class="card"><div class="card-title">BORÇ</div><div class="card-value badge-red" id="d-borc">0 ₺</div></div>
-      <div class="card"><div class="card-title">ALACAK</div><div class="card-value badge-green" id="d-alacak">0 ₺</div></div>
-      <div class="card"><div class="card-title">BAKİYE</div><div class="card-value" id="d-bakiye">0 ₺</div></div>
-    </div>
-    <div class="section-header">
-      <span class="section-title">Hareketler</span>
-      <button class="btn btn-ghost btn-sm" onclick="openHareket()">+ Hareket</button>
-    </div>
-    <div id="hareket-list" class="list-container"></div>
-  </div>
-
-  <!-- ── PAGE: ÜRÜNLER ─────────────────────────────────────────────────── -->
-  <div class="page" id="page-urunler">
-    <div id="urun-list" class="list-container"></div>
-  </div>
-
-  <!-- ── PAGE: SATIŞ ───────────────────────────────────────────────────── -->
-  <div class="page" id="page-satis">
-    <div class="form-card">
-      <div class="form-title">Yeni Satış</div>
+  <!-- Hareket Ekle -->
+  <div class="modal-overlay" id="modal-hareket">
+    <div class="modal">
+      <div class="modal-title">Manuel Hareket</div>
+      <div class="field" style="margin-bottom:10px"><label>Tarih</label><input type="date" id="mh-tarih"></div>
+      <div class="field" style="margin-bottom:10px"><label>Açıklama</label><input type="text" id="mh-acik"></div>
       <div class="form-row">
-        <div class="field"><label>Cari</label>
-          <select id="st-cari"></select></div>
+        <div class="field"><label>Borç ₺</label><input type="number" id="mh-borc" value="0" step="any"></div>
+        <div class="field"><label>Alacak ₺</label><input type="number" id="mh-alacak" value="0" step="any"></div>
       </div>
-      <div class="form-row">
-        <div class="field"><label>Ürün</label>
-          <select id="st-urun" onchange="urunSecildi()"></select></div>
+      <div class="modal-btns">
+        <button class="btn btn-ghost" onclick="closeModal('modal-hareket')">İptal</button>
+        <button class="btn btn-primary" onclick="hareketKaydet()">Kaydet</button>
       </div>
-      <div class="form-row">
-        <div class="field"><label>Adet</label>
-          <input type="number" id="st-adet" value="1" min="0.01" step="any"></div>
-        <div class="field"><label>Birim Fiyat ₺</label>
-          <input type="number" id="st-fiyat" value="0" min="0" step="any"></div>
-      </div>
-      <div class="form-row">
-        <div class="field"><label>Tarih</label>
-          <input type="date" id="st-tarih"></div>
-      </div>
-      <div class="form-row">
-        <div class="field"><label>Açıklama</label>
-          <input type="text" id="st-acik" placeholder="İsteğe bağlı"></div>
-      </div>
-      <div class="form-row">
-        <button class="btn btn-green" style="width:100%" onclick="satisKaydet()">🛒 Satışı Kaydet</button>
-      </div>
-    </div>
-    <div class="section-header">
-      <span class="section-title">Satış Geçmişi</span>
-    </div>
-    <div id="satis-list" class="list-container"></div>
-  </div>
-
-  <!-- ── PAGE: ÖDEMELER ────────────────────────────────────────────────── -->
-  <div class="page" id="page-odemeler">
-    <div class="form-card">
-      <div class="form-title">Yeni Ödeme</div>
-      <div class="form-row">
-        <div class="field"><label>Cari</label>
-          <select id="od-cari"></select></div>
-      </div>
-      <div class="form-row">
-        <div class="field"><label>Tutar ₺</label>
-          <input type="number" id="od-tutar" value="0" min="0" step="any"></div>
-        <div class="field"><label>Yöntem</label>
-          <select id="od-yontem">
-            <option>Nakit</option><option>Havale/EFT</option>
-            <option>Çek</option><option>Kredi Kartı</option><option>Diğer</option>
-          </select></div>
-      </div>
-      <div class="form-row">
-        <div class="field"><label>Tarih</label>
-          <input type="date" id="od-tarih"></div>
-      </div>
-      <div class="form-row">
-        <div class="field"><label>Açıklama</label>
-          <input type="text" id="od-acik" placeholder="İsteğe bağlı"></div>
-      </div>
-      <div class="form-row">
-        <button class="btn btn-primary" style="width:100%" onclick="odemeKaydet()">💰 Ödemeyi Kaydet</button>
-      </div>
-    </div>
-    <div class="section-header">
-      <span class="section-title">Ödeme Geçmişi</span>
-    </div>
-    <div id="odeme-list" class="list-container"></div>
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" data-page="cariler" onclick="navTo('cariler')">
-      <span class="ico">👥</span>Cariler
-    </button>
-    <button class="nav-btn" data-page="urunler" onclick="navTo('urunler')">
-      <span class="ico">📦</span>Ürünler
-    </button>
-    <button class="nav-btn" data-page="satis" onclick="navTo('satis')">
-      <span class="ico">🛒</span>Satış
-    </button>
-    <button class="nav-btn" data-page="odemeler" onclick="navTo('odemeler')">
-      <span class="ico">💰</span>Ödemeler
-    </button>
-  </nav>
-</div>
-
-<!-- ── MODALLER ─────────────────────────────────────────────────────────────── -->
-
-<!-- Cari Ekle/Düzenle -->
-<div class="modal-overlay" id="modal-cari">
-  <div class="modal">
-    <div class="modal-title" id="modal-cari-title">Yeni Cari</div>
-    <input type="hidden" id="mc-id">
-    <div class="field" style="margin-bottom:10px"><label>Firma Adı *</label><input type="text" id="mc-firma"></div>
-    <div class="field" style="margin-bottom:10px"><label>Yetkili</label><input type="text" id="mc-yetkili"></div>
-    <div class="form-row">
-      <div class="field"><label>Telefon</label><input type="tel" id="mc-tel"></div>
-      <div class="field"><label>E-posta</label><input type="email" id="mc-email"></div>
-    </div>
-    <div class="field" style="margin:10px 0"><label>Adres</label><input type="text" id="mc-adres"></div>
-    <div class="field" style="margin-bottom:10px"><label>Notlar</label><input type="text" id="mc-notlar"></div>
-    <div class="modal-btns">
-      <button class="btn btn-ghost" onclick="closeModal('modal-cari')">İptal</button>
-      <button class="btn btn-primary" onclick="cariKaydet()">Kaydet</button>
     </div>
   </div>
-</div>
-
-<!-- Ürün Ekle/Düzenle -->
-<div class="modal-overlay" id="modal-urun">
-  <div class="modal">
-    <div class="modal-title" id="modal-urun-title">Yeni Ürün</div>
-    <input type="hidden" id="mu-id">
-    <div class="field" style="margin-bottom:10px"><label>Ürün Adı *</label><input type="text" id="mu-ad"></div>
-    <div class="form-row">
-      <div class="field"><label>Kod</label><input type="text" id="mu-kod"></div>
-      <div class="field"><label>Birim</label>
-        <select id="mu-birim"><option>Adet</option><option>Kg</option><option>Lt</option><option>Mt</option><option>Kutu</option><option>Paket</option><option>Ton</option><option>m²</option></select>
-      </div>
-    </div>
-    <div class="form-row" style="margin-top:10px">
-      <div class="field"><label>Fiyat ₺</label><input type="number" id="mu-fiyat" value="0" step="any"></div>
-      <div class="field"><label>Stok</label><input type="number" id="mu-stok" value="0" step="any"></div>
-    </div>
-    <div class="field" style="margin:10px 0"><label>Notlar</label><input type="text" id="mu-notlar"></div>
-    <div class="modal-btns">
-      <button class="btn btn-ghost" onclick="closeModal('modal-urun')">İptal</button>
-      <button class="btn btn-green" onclick="urunKaydet()">Kaydet</button>
-    </div>
-  </div>
-</div>
-
-<!-- Hareket Ekle -->
-<div class="modal-overlay" id="modal-hareket">
-  <div class="modal">
-    <div class="modal-title">Manuel Hareket</div>
-    <div class="field" style="margin-bottom:10px"><label>Tarih</label><input type="date" id="mh-tarih"></div>
-    <div class="field" style="margin-bottom:10px"><label>Açıklama</label><input type="text" id="mh-acik"></div>
-    <div class="form-row">
-      <div class="field"><label>Borç ₺</label><input type="number" id="mh-borc" value="0" step="any"></div>
-      <div class="field"><label>Alacak ₺</label><input type="number" id="mh-alacak" value="0" step="any"></div>
-    </div>
-    <div class="modal-btns">
-      <button class="btn btn-ghost" onclick="closeModal('modal-hareket')">İptal</button>
-      <button class="btn btn-primary" onclick="hareketKaydet()">Kaydet</button>
-    </div>
-  </div>
-</div>
 
   <script>
+    // ── Supabase ──────────────────────────────────────────────────────────────
+    const SUPABASE_URL = "https://heympechtvitgcouzelm.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhleW1wZWNodHZpdGdjb3V6ZWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1ODIzNTgsImV4cCI6MjA4NzE1ODM1OH0.39HTPMgdu3FT8jmcQqmum3pvY6sWzLLvwWnhuY4pU-Q";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Orijinal fetch'i sakla
-const originalFetch = window.fetch;
+    // ── Auth ──────────────────────────────────────────────────────────────────
+    async function checkAuth() {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        localStorage.setItem("token", data.session.access_token);
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("app").style.display = "flex";
+        injectAuthHeader();
+        loadCariler();
+      } else {
+        document.getElementById("login-screen").style.display = "flex";
+        document.getElementById("app").style.display = "none";
+      }
+    }
 
-// Yeni fetch tanımı
-window.fetch = function(url, options = {}) {
+    async function login() {
+      const email    = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      if (!email || !password) { alert("E-posta ve şifre gereklidir"); return; }
 
-  const token = localStorage.getItem("token");
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) { alert("Hatalı e-posta veya şifre"); return; }
 
-  // options yoksa oluştur
-  if (!options.headers) {
-    options.headers = {};
-  }
+      localStorage.setItem("token", data.session.access_token);
+      checkAuth();
+    }
 
-  // Token varsa ekle
-  if (token) {
-    options.headers["Authorization"] = "Bearer " + token;
-  }
+    async function logout() {
+      await supabase.auth.signOut();
+      localStorage.removeItem("token");
+      checkAuth();
+    }
 
-  return originalFetch(url, options);
-};
+    // Token'ı tüm fetch isteklerine otomatik ekle
+    function injectAuthHeader() {
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options = {}) {
+        const token = localStorage.getItem("token");
+        if (!options.headers) options.headers = {};
+        if (token) options.headers["Authorization"] = "Bearer " + token;
+        return originalFetch(url, options);
+      };
+    }
 
-<script>
-// ── State ──────────────────────────────────────────────────────────────────────
-let state = {
-  currentPage: 'cariler',
-  cariler: [], urunler: [], satislar: [], odemeler: [],
-  selectedCari: null,
-  hareketler: [],
-  prevPage: null
-};
+    // ── State ─────────────────────────────────────────────────────────────────
+    let state = {
+      currentPage: 'cariler',
+      cariler: [], urunler: [], satislar: [], odemeler: [],
+      selectedCari: null,
+      hareketler: [],
+      prevPage: null
+    };
 
-const today = () => new Date().toISOString().split('T')[0];
+    const today = () => new Date().toISOString().split('T')[0];
 
-// ── API ────────────────────────────────────────────────────────────────────────
-const api = {
-  get:    (url) => fetch(url).then(r => r.json()),
-  post:   (url, d) => fetch(url, {method:'POST',  headers:{'Content-Type':'application/json'}, body: JSON.stringify(d)}).then(r => r.json()),
-  put:    (url, d) => fetch(url, {method:'PUT',   headers:{'Content-Type':'application/json'}, body: JSON.stringify(d)}).then(r => r.json()),
-  delete: (url)    => fetch(url, {method:'DELETE'}).then(r => r.json()),
-};
+    // ── API ───────────────────────────────────────────────────────────────────
+    const api = {
+      get:    (url)    => fetch(url).then(r => r.json()),
+      post:   (url, d) => fetch(url, { method: 'POST',   headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }).then(r => r.json()),
+      put:    (url, d) => fetch(url, { method: 'PUT',    headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) }).then(r => r.json()),
+      delete: (url)    => fetch(url, { method: 'DELETE' }).then(r => r.json()),
+    };
 
-// ── Navigasyon ─────────────────────────────────────────────────────────────────
-function navTo(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
-  state.currentPage = page;
-  updateTopbar(page);
-  if (page === 'cariler')   loadCariler();
-  if (page === 'urunler')   loadUrunler();
-  if (page === 'satis')     { loadSatisCombos(); loadSatislar(); }
-  if (page === 'odemeler')  { loadOdemeCombos(); loadOdemeler(); }
-}
+    // ── Navigasyon ────────────────────────────────────────────────────────────
+    function navTo(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('page-' + page).classList.add('active');
+      document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+      state.currentPage = page;
+      updateTopbar(page);
+      if (page === 'cariler')  loadCariler();
+      if (page === 'urunler')  loadUrunler();
+      if (page === 'satis')    { loadSatisCombos(); loadSatislar(); }
+      if (page === 'odemeler') { loadOdemeCombos(); loadOdemeler(); }
+    }
 
-function goBack() {
-  document.getElementById('page-detay').classList.remove('active');
-  navTo('cariler');
-}
+    function goBack() {
+      document.getElementById('page-detay').classList.remove('active');
+      navTo('cariler');
+    }
 
-function updateTopbar(page) {
-  const labels = { cariler: 'Cari Listesi', urunler: 'Ürün Listesi', satis: 'Satış', odemeler: 'Ödemeler', detay: 'Cari Detay' };
-  const counts = { cariler: state.cariler.length + ' kayıt', urunler: state.urunler.length + ' ürün', satis: state.satislar.length + ' satış', odemeler: state.odemeler.length + ' ödeme', detay: state.selectedCari?.firma_adi || '' };
-  document.getElementById('topbar-sub').textContent = counts[page] || '';
-  const addLabels = { cariler: '+ Cari', urunler: '+ Ürün', satis: '', odemeler: '', detay: '✏ Düzenle' };
-  const btn = document.getElementById('topbar-action-btn');
-  btn.textContent = addLabels[page] || '';
-  btn.style.display = addLabels[page] ? '' : 'none';
-}
+    function updateTopbar(page) {
+      const counts = {
+        cariler:  state.cariler.length  + ' kayıt',
+        urunler:  state.urunler.length  + ' ürün',
+        satis:    state.satislar.length + ' satış',
+        odemeler: state.odemeler.length + ' ödeme',
+        detay:    state.selectedCari?.firma_adi || ''
+      };
+      const addLabels = {
+        cariler: '+ Cari', urunler: '+ Ürün',
+        satis: '', odemeler: '',
+        detay: '✏ Düzenle'
+      };
+      document.getElementById('topbar-sub').textContent = counts[page] || '';
+      const btn = document.getElementById('topbar-action-btn');
+      btn.textContent = addLabels[page] || '';
+      btn.style.display = addLabels[page] ? '' : 'none';
+    }
 
-function topbarAction() {
-  if (state.currentPage === 'cariler') openCariModal();
-  if (state.currentPage === 'urunler') openUrunModal();
-  if (state.currentPage === 'detay')   openCariModal(state.selectedCari);
-}
+    function topbarAction() {
+      if (state.currentPage === 'cariler') openCariModal();
+      if (state.currentPage === 'urunler') openUrunModal();
+      if (state.currentPage === 'detay')   openCariModal(state.selectedCari);
+    }
 
-// ── Format ─────────────────────────────────────────────────────────────────────
-const fmt = n => Number(n || 0).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' ₺';
+    // ── Format ────────────────────────────────────────────────────────────────
+    const fmt = n => Number(n || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
 
-// ── Cariler ────────────────────────────────────────────────────────────────────
-async function loadCariler() {
-  const q = document.getElementById('cari-search')?.value || '';
-  state.cariler = await api.get('/api/cariler?q=' + encodeURIComponent(q));
-  renderCariler();
-  updateTopbar('cariler');
-}
+    // ── Cariler ───────────────────────────────────────────────────────────────
+    async function loadCariler() {
+      const q = document.getElementById('cari-search')?.value || '';
+      state.cariler = await api.get('/api/cariler?q=' + encodeURIComponent(q));
+      renderCariler();
+      updateTopbar('cariler');
+    }
 
-function filterCariler(q) {
-  clearTimeout(window._st);
-  window._st = setTimeout(() => loadCariler(), 200);
-}
+    function filterCariler() {
+      clearTimeout(window._searchTimer);
+      window._searchTimer = setTimeout(() => loadCariler(), 200);
+    }
 
-function renderCariler() {
-  const el = document.getElementById('cari-list');
-  if (!state.cariler.length) { el.innerHTML = '<div class="empty">Henüz cari yok.<br>+ Cari butonu ile ekleyin.</div>'; return; }
-  el.innerHTML = state.cariler.map(c => `
-    <div class="list-item" onclick="openDetay(${c.id})">
-      <div>
-        <div class="list-item-main">${c.firma_adi}</div>
-        <div class="list-item-sub">${c.yetkili || ''} ${c.telefon ? '· ' + c.telefon : ''}</div>
-      </div>
-      <div class="list-item-badge">›</div>
-    </div>`).join('');
-}
+    function renderCariler() {
+      const el = document.getElementById('cari-list');
+      if (!state.cariler.length) {
+        el.innerHTML = '<div class="empty">Henüz cari yok.<br>+ Cari butonu ile ekleyin.</div>';
+        return;
+      }
+      el.innerHTML = state.cariler.map(c => `
+        <div class="list-item" onclick="openDetay(${c.id})">
+          <div>
+            <div class="list-item-main">${c.firma_adi}</div>
+            <div class="list-item-sub">${c.yetkili || ''}${c.telefon ? ' · ' + c.telefon : ''}</div>
+          </div>
+          <div class="list-item-badge">›</div>
+        </div>`).join('');
+    }
 
-async function openDetay(cariId) {
-  state.selectedCari = state.cariler.find(c => c.id === cariId);
-  state.prevPage = 'cariler';
-  // Sayfayı göster
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-detay').classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  state.currentPage = 'detay';
-  updateTopbar('detay');
-  // Header
-  const c = state.selectedCari;
-  document.getElementById('detay-header').innerHTML = `
-    <div class="detail-firma">${c.firma_adi}</div>
-    <div class="detail-info">
-      ${c.yetkili ? '👤 ' + c.yetkili + '<br>' : ''}
-      ${c.telefon ? '📞 ' + c.telefon + '<br>' : ''}
-      ${c.email   ? '✉ '  + c.email   + '<br>' : ''}
-      ${c.adres   ? '📍 ' + c.adres          : ''}
-    </div>`;
-  await loadOzet();
-  await loadHareketler();
-}
+    async function openDetay(cariId) {
+      state.selectedCari = state.cariler.find(c => c.id === cariId);
+      state.prevPage = 'cariler';
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById('page-detay').classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      state.currentPage = 'detay';
+      updateTopbar('detay');
+      const c = state.selectedCari;
+      document.getElementById('detay-header').innerHTML = `
+        <div class="detail-firma">${c.firma_adi}</div>
+        <div class="detail-info">
+          ${c.yetkili ? '👤 ' + c.yetkili + '<br>' : ''}
+          ${c.telefon ? '📞 ' + c.telefon + '<br>' : ''}
+          ${c.email   ? '✉ '  + c.email   + '<br>' : ''}
+          ${c.adres   ? '📍 ' + c.adres          : ''}
+        </div>`;
+      await loadOzet();
+      await loadHareketler();
+    }
 
-async function loadOzet() {
-  const oz = await api.get('/api/cariler/' + state.selectedCari.id + '/ozet');
-  document.getElementById('d-borc').textContent   = fmt(oz.borc);
-  document.getElementById('d-alacak').textContent = fmt(oz.alacak);
-  const bEl = document.getElementById('d-bakiye');
-  bEl.textContent = fmt(oz.bakiye);
-  bEl.className = 'card-value ' + (oz.bakiye > 0 ? 'badge-red' : 'badge-green');
-}
+    async function loadOzet() {
+      const oz = await api.get('/api/cariler/' + state.selectedCari.id + '/ozet');
+      document.getElementById('d-borc').textContent   = fmt(oz.borc);
+      document.getElementById('d-alacak').textContent = fmt(oz.alacak);
+      const bEl = document.getElementById('d-bakiye');
+      bEl.textContent = fmt(oz.bakiye);
+      bEl.className = 'card-value ' + (oz.bakiye > 0 ? 'badge-red' : 'badge-green');
+    }
 
-async function loadHareketler() {
-  state.hareketler = await api.get('/api/hareketler/' + state.selectedCari.id);
-  const el = document.getElementById('hareket-list');
-  if (!state.hareketler.length) { el.innerHTML = '<div class="empty">Henüz hareket yok.</div>'; return; }
-  el.innerHTML = [...state.hareketler].reverse().map(h => `
-    <div class="hareket-item">
-      <div class="hareket-top">
-        <div class="hareket-aciklama">${h.aciklama || '-'}</div>
-        <div class="hareket-tutar ${h.borc > 0 ? 'h-borc' : 'h-alacak'}">
-          ${h.borc > 0 ? '+' + fmt(h.borc) : '-' + fmt(h.alacak)}
-        </div>
-      </div>
-      <div class="hareket-bottom">
-        <div>
-          <span class="hareket-meta">${h.tarih}</span>
-          <span class="tag tag-${h.tur}" style="margin-left:6px">${h.tur}</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="hareket-bakiye">Bkye: ${fmt(h.bakiye)}</span>
-        </div>
-      </div>
-    </div>`).join('');
-}
+    async function loadHareketler() {
+      state.hareketler = await api.get('/api/hareketler/' + state.selectedCari.id);
+      const el = document.getElementById('hareket-list');
+      if (!state.hareketler.length) {
+        el.innerHTML = '<div class="empty">Henüz hareket yok.</div>';
+        return;
+      }
+      el.innerHTML = [...state.hareketler].reverse().map(h => `
+        <div class="hareket-item">
+          <div class="hareket-top">
+            <div class="hareket-aciklama">${h.aciklama || '-'}</div>
+            <div class="hareket-tutar ${h.borc > 0 ? 'h-borc' : 'h-alacak'}">
+              ${h.borc > 0 ? '+' + fmt(h.borc) : '-' + fmt(h.alacak)}
+            </div>
+          </div>
+          <div class="hareket-bottom">
+            <div>
+              <span class="hareket-meta">${h.tarih}</span>
+              <span class="tag tag-${h.tur}" style="margin-left:6px">${h.tur}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="hareket-bakiye">Bkye: ${fmt(h.bakiye)}</span>
+              <span onclick="hareketSil(${h.id})" style="color:var(--red);cursor:pointer;font-size:18px">×</span>
+            </div>
+          </div>
+        </div>`).join('');
+    }
 
-function openCariModal(c) {
-  document.getElementById('mc-id').value     = c?.id || '';
-  document.getElementById('mc-firma').value  = c?.firma_adi || '';
-  document.getElementById('mc-yetkili').value= c?.yetkili || '';
-  document.getElementById('mc-tel').value    = c?.telefon || '';
-  document.getElementById('mc-email').value  = c?.email || '';
-  document.getElementById('mc-adres').value  = c?.adres || '';
-  document.getElementById('mc-notlar').value = c?.notlar || '';
-  document.getElementById('modal-cari-title').textContent = c ? 'Cari Düzenle' : 'Yeni Cari';
-  openModal('modal-cari');
-}
+    function openCariModal(c) {
+      document.getElementById('mc-id').value      = c?.id || '';
+      document.getElementById('mc-firma').value   = c?.firma_adi || '';
+      document.getElementById('mc-yetkili').value = c?.yetkili || '';
+      document.getElementById('mc-tel').value     = c?.telefon || '';
+      document.getElementById('mc-email').value   = c?.email || '';
+      document.getElementById('mc-adres').value   = c?.adres || '';
+      document.getElementById('mc-notlar').value  = c?.notlar || '';
+      document.getElementById('modal-cari-title').textContent = c ? 'Cari Düzenle' : 'Yeni Cari';
+      openModal('modal-cari');
+    }
 
-async function cariKaydet() {
-  const firma = document.getElementById('mc-firma').value.trim();
-  if (!firma) { alert('Firma adı zorunludur'); return; }
-  const d = { firma_adi: firma, yetkili: document.getElementById('mc-yetkili').value.trim(), telefon: document.getElementById('mc-tel').value.trim(), email: document.getElementById('mc-email').value.trim(), adres: document.getElementById('mc-adres').value.trim(), notlar: document.getElementById('mc-notlar').value.trim() };
-  const id = document.getElementById('mc-id').value;
-  if (id) await api.put('/api/cariler/' + id, d);
-  else    await api.post('/api/cariler', d);
-  closeModal('modal-cari');
-  if (state.currentPage === 'detay') {
-    state.selectedCari = {...state.selectedCari, ...d};
-    openDetay(state.selectedCari.id);
-  }
-  loadCariler();
-}
+    async function cariKaydet() {
+      const firma = document.getElementById('mc-firma').value.trim();
+      if (!firma) { alert('Firma adı zorunludur'); return; }
+      const d = {
+        firma_adi: firma,
+        yetkili:   document.getElementById('mc-yetkili').value.trim(),
+        telefon:   document.getElementById('mc-tel').value.trim(),
+        email:     document.getElementById('mc-email').value.trim(),
+        adres:     document.getElementById('mc-adres').value.trim(),
+        notlar:    document.getElementById('mc-notlar').value.trim()
+      };
+      const id = document.getElementById('mc-id').value;
+      if (id) await api.put('/api/cariler/' + id, d);
+      else    await api.post('/api/cariler', d);
+      closeModal('modal-cari');
+      if (state.currentPage === 'detay') {
+        state.selectedCari = { ...state.selectedCari, ...d };
+        openDetay(state.selectedCari.id);
+      }
+      loadCariler();
+    }
 
-async function cariSil(id) {
-  if (!confirm('Bu cari ve tüm kayıtları silinecek. Emin misiniz?')) return;
-  await api.delete('/api/cariler/' + id);
-  goBack();
-  loadCariler();
-}
+    async function cariSil(id) {
+      if (!confirm('Bu cari ve tüm kayıtları silinecek. Emin misiniz?')) return;
+      await api.delete('/api/cariler/' + id);
+      goBack();
+      loadCariler();
+    }
 
-// ── Hareketler ─────────────────────────────────────────────────────────────────
-function openHareket() {
-  document.getElementById('mh-tarih').value = today();
-  document.getElementById('mh-acik').value  = '';
-  document.getElementById('mh-borc').value  = '0';
-  document.getElementById('mh-alacak').value= '0';
-  openModal('modal-hareket');
-}
+    // ── Hareketler ────────────────────────────────────────────────────────────
+    function openHareket() {
+      document.getElementById('mh-tarih').value  = today();
+      document.getElementById('mh-acik').value   = '';
+      document.getElementById('mh-borc').value   = '0';
+      document.getElementById('mh-alacak').value = '0';
+      openModal('modal-hareket');
+    }
 
-async function hareketKaydet() {
-  await api.post('/api/hareketler', {
-    cari_id: state.selectedCari.id,
-    tarih:   document.getElementById('mh-tarih').value,
-    aciklama:document.getElementById('mh-acik').value.trim(),
-    borc:    document.getElementById('mh-borc').value,
-    alacak:  document.getElementById('mh-alacak').value,
-  });
-  closeModal('modal-hareket');
-  loadOzet(); loadHareketler();
-}
+    async function hareketKaydet() {
+      await api.post('/api/hareketler', {
+        cari_id:  state.selectedCari.id,
+        tarih:    document.getElementById('mh-tarih').value,
+        aciklama: document.getElementById('mh-acik').value.trim(),
+        borc:     document.getElementById('mh-borc').value,
+        alacak:   document.getElementById('mh-alacak').value,
+      });
+      closeModal('modal-hareket');
+      loadOzet();
+      loadHareketler();
+    }
 
-async function hareketSil(id) {
-  if (!confirm('Bu hareket silinsin mi?')) return;
-  await api.delete('/api/hareketler/' + id);
-  loadOzet(); loadHareketler();
-}
+    async function hareketSil(id) {
+      if (!confirm('Bu hareket silinsin mi?')) return;
+      await api.delete('/api/hareketler/' + id);
+      loadOzet();
+      loadHareketler();
+    }
 
-// ── Ürünler ────────────────────────────────────────────────────────────────────
-async function loadUrunler() {
-  state.urunler = await api.get('/api/urunler');
-  renderUrunler();
-  updateTopbar('urunler');
-}
+    // ── Ürünler ───────────────────────────────────────────────────────────────
+    async function loadUrunler() {
+      state.urunler = await api.get('/api/urunler');
+      renderUrunler();
+      updateTopbar('urunler');
+    }
 
-function renderUrunler() {
-  const el = document.getElementById('urun-list');
-  if (!state.urunler.length) { el.innerHTML = '<div class="empty">Henüz ürün yok.<br>+ Ürün butonu ile ekleyin.</div>'; return; }
-  el.innerHTML = state.urunler.map(u => `
-    <div class="list-item">
-      <div>
-        <div class="list-item-main">${u.ad} ${u.kod ? '<small style="color:var(--sub)">[${u.kod}]</small>' : ''}</div>
-        <div class="list-item-sub">${u.birim} · Stok: ${u.stok}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="text-align:right">
-          <div style="font-weight:500;color:var(--orange)">${fmt(u.fiyat)}</div>
-        </div>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost btn-sm" onclick="openUrunModal(${u.id})">✏</button>
-          <button class="btn btn-red btn-sm" onclick="urunSil(${u.id})">🗑</button>
-        </div>
-      </div>
-    </div>`).join('');
-}
+    function renderUrunler() {
+      const el = document.getElementById('urun-list');
+      if (!state.urunler.length) {
+        el.innerHTML = '<div class="empty">Henüz ürün yok.<br>+ Ürün butonu ile ekleyin.</div>';
+        return;
+      }
+      el.innerHTML = state.urunler.map(u => `
+        <div class="list-item">
+          <div>
+            <div class="list-item-main">${u.ad}${u.kod ? ' <small style="color:var(--sub)">[' + u.kod + ']</small>' : ''}</div>
+            <div class="list-item-sub">${u.birim} · Stok: ${u.stok}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="text-align:right">
+              <div style="font-weight:500;color:var(--orange)">${fmt(u.fiyat)}</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="openUrunModal(${u.id})">✏</button>
+              <button class="btn btn-red btn-sm" onclick="urunSil(${u.id})">🗑</button>
+            </div>
+          </div>
+        </div>`).join('');
+    }
 
-function openUrunModal(uid) {
-  const u = uid ? state.urunler.find(x => x.id === uid) : null;
-  document.getElementById('mu-id').value    = u?.id || '';
-  document.getElementById('mu-ad').value    = u?.ad || '';
-  document.getElementById('mu-kod').value   = u?.kod || '';
-  document.getElementById('mu-birim').value = u?.birim || 'Adet';
-  document.getElementById('mu-fiyat').value = u?.fiyat || '0';
-  document.getElementById('mu-stok').value  = u?.stok || '0';
-  document.getElementById('mu-notlar').value= u?.notlar || '';
-  document.getElementById('modal-urun-title').textContent = u ? 'Ürün Düzenle' : 'Yeni Ürün';
-  openModal('modal-urun');
-}
+    function openUrunModal(uid) {
+      const u = uid ? state.urunler.find(x => x.id === uid) : null;
+      document.getElementById('mu-id').value     = u?.id || '';
+      document.getElementById('mu-ad').value     = u?.ad || '';
+      document.getElementById('mu-kod').value    = u?.kod || '';
+      document.getElementById('mu-birim').value  = u?.birim || 'Adet';
+      document.getElementById('mu-fiyat').value  = u?.fiyat || '0';
+      document.getElementById('mu-stok').value   = u?.stok || '0';
+      document.getElementById('mu-notlar').value = u?.notlar || '';
+      document.getElementById('modal-urun-title').textContent = u ? 'Ürün Düzenle' : 'Yeni Ürün';
+      openModal('modal-urun');
+    }
 
-async function urunKaydet() {
-  const ad = document.getElementById('mu-ad').value.trim();
-  if (!ad) { alert('Ürün adı zorunludur'); return; }
-  const d = { ad, kod: document.getElementById('mu-kod').value.trim(), birim: document.getElementById('mu-birim').value, fiyat: document.getElementById('mu-fiyat').value, stok: document.getElementById('mu-stok').value, notlar: document.getElementById('mu-notlar').value.trim() };
-  const id = document.getElementById('mu-id').value;
-  if (id) await api.put('/api/urunler/' + id, d);
-  else    await api.post('/api/urunler', d);
-  closeModal('modal-urun');
-  loadUrunler();
-}
+    async function urunKaydet() {
+      const ad = document.getElementById('mu-ad').value.trim();
+      if (!ad) { alert('Ürün adı zorunludur'); return; }
+      const d = {
+        ad,
+        kod:    document.getElementById('mu-kod').value.trim(),
+        birim:  document.getElementById('mu-birim').value,
+        fiyat:  document.getElementById('mu-fiyat').value,
+        stok:   document.getElementById('mu-stok').value,
+        notlar: document.getElementById('mu-notlar').value.trim()
+      };
+      const id = document.getElementById('mu-id').value;
+      if (id) await api.put('/api/urunler/' + id, d);
+      else    await api.post('/api/urunler', d);
+      closeModal('modal-urun');
+      loadUrunler();
+    }
 
-async function urunSil(id) {
-  if (!confirm('Bu ürün silinsin mi?')) return;
-  const r = await api.delete('/api/urunler/' + id);
-  if (r.error) alert(r.error);
-  else loadUrunler();
-}
+    async function urunSil(id) {
+      if (!confirm('Bu ürün silinsin mi?')) return;
+      const r = await api.delete('/api/urunler/' + id);
+      if (r.error) alert(r.error);
+      else loadUrunler();
+    }
 
-// ── Satış ──────────────────────────────────────────────────────────────────────
-async function loadSatisCombos() {
-  const [cariler, urunler] = await Promise.all([api.get('/api/cariler'), api.get('/api/urunler')]);
-  state.cariler = cariler; state.urunler = urunler;
-  const cSel = document.getElementById('st-cari');
-  const uSel = document.getElementById('st-urun');
-  cSel.innerHTML = '<option value="">-- Cari Seçin --</option>' + cariler.map(c => `<option value="${c.id}">${c.firma_adi}</option>`).join('');
-  uSel.innerHTML = '<option value="">-- Ürün Seçin --</option>' + urunler.map(u => `<option value="${u.id}" data-fiyat="${u.fiyat}">${u.ad}</option>`).join('');
-  document.getElementById('st-tarih').value = today();
-}
+    // ── Satış ─────────────────────────────────────────────────────────────────
+    async function loadSatisCombos() {
+      const [cariler, urunler] = await Promise.all([api.get('/api/cariler'), api.get('/api/urunler')]);
+      state.cariler = cariler;
+      state.urunler = urunler;
+      const cSel = document.getElementById('st-cari');
+      const uSel = document.getElementById('st-urun');
+      cSel.innerHTML = '<option value="">-- Cari Seçin --</option>' + cariler.map(c => `<option value="${c.id}">${c.firma_adi}</option>`).join('');
+      uSel.innerHTML = '<option value="">-- Ürün Seçin --</option>' + urunler.map(u => `<option value="${u.id}" data-fiyat="${u.fiyat}">${u.ad}</option>`).join('');
+      document.getElementById('st-tarih').value = today();
+    }
 
-function urunSecildi() {
-  const sel = document.getElementById('st-urun');
-  const opt = sel.options[sel.selectedIndex];
-  if (opt && opt.dataset.fiyat) document.getElementById('st-fiyat').value = opt.dataset.fiyat;
-}
+    function urunSecildi() {
+      const sel = document.getElementById('st-urun');
+      const opt = sel.options[sel.selectedIndex];
+      if (opt && opt.dataset.fiyat) document.getElementById('st-fiyat').value = opt.dataset.fiyat;
+    }
 
-async function loadSatislar() {
-  state.satislar = await api.get('/api/satislar');
-  const el = document.getElementById('satis-list');
-  if (!state.satislar.length) { el.innerHTML = '<div class="empty">Henüz satış yok.</div>'; return; }
-  el.innerHTML = state.satislar.map(s => `
-    <div class="tablo-item">
-      <div class="tablo-row1">
-        <div class="tablo-firma">${s.firma_adi}</div>
-        <div class="tablo-tutar">${fmt(s.toplam)}</div>
-      </div>
-      <div class="tablo-row2">
-        <div class="tablo-detail">${s.urun_adi} × ${s.adet} @ ${fmt(s.birim_fiyat)}</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="tablo-date">${s.tarih}</span>
-          <span onclick="satisSil(${s.id})" style="color:var(--red);cursor:pointer;font-size:18px">×</span>
-        </div>
-      </div>
-    </div>`).join('');
-}
+    async function loadSatislar() {
+      state.satislar = await api.get('/api/satislar');
+      const el = document.getElementById('satis-list');
+      if (!state.satislar.length) {
+        el.innerHTML = '<div class="empty">Henüz satış yok.</div>';
+        return;
+      }
+      el.innerHTML = state.satislar.map(s => `
+        <div class="tablo-item">
+          <div class="tablo-row1">
+            <div class="tablo-firma">${s.firma_adi}</div>
+            <div class="tablo-tutar">${fmt(s.toplam)}</div>
+          </div>
+          <div class="tablo-row2">
+            <div class="tablo-detail">${s.urun_adi} × ${s.adet} @ ${fmt(s.birim_fiyat)}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="tablo-date">${s.tarih}</span>
+              <span onclick="satisSil(${s.id})" style="color:var(--red);cursor:pointer;font-size:18px">×</span>
+            </div>
+          </div>
+        </div>`).join('');
+    }
 
-async function satisKaydet() {
-  const cariId = document.getElementById('st-cari').value;
-  const urunSel = document.getElementById('st-urun');
-  const urunId = urunSel.value;
-  const urunAdi = urunSel.options[urunSel.selectedIndex]?.text || '';
-  if (!cariId) { alert('Cari seçin'); return; }
-  if (!urunId) { alert('Ürün seçin'); return; }
-  const adet  = parseFloat(document.getElementById('st-adet').value);
-  const fiyat = parseFloat(document.getElementById('st-fiyat').value);
-  if (!adet || adet <= 0) { alert('Geçerli adet girin'); return; }
-  const r = await api.post('/api/satislar', {
-    cari_id: cariId, urun_id: urunId, urun_adi: urunAdi,
-    tarih: document.getElementById('st-tarih').value,
-    adet, birim_fiyat: fiyat,
-    aciklama: document.getElementById('st-acik').value.trim()
-  });
-  if (r.ok) {
-    alert('Satış kaydedildi: ' + fmt(r.toplam));
-    document.getElementById('st-adet').value = '1';
-    document.getElementById('st-acik').value = '';
-    loadSatislar();
-  } else alert(r.error || 'Hata oluştu');
-}
+    async function satisKaydet() {
+      const cariId  = document.getElementById('st-cari').value;
+      const urunSel = document.getElementById('st-urun');
+      const urunId  = urunSel.value;
+      const urunAdi = urunSel.options[urunSel.selectedIndex]?.text || '';
+      if (!cariId) { alert('Cari seçin'); return; }
+      if (!urunId) { alert('Ürün seçin'); return; }
+      const adet  = parseFloat(document.getElementById('st-adet').value);
+      const fiyat = parseFloat(document.getElementById('st-fiyat').value);
+      if (!adet || adet <= 0) { alert('Geçerli adet girin'); return; }
+      const r = await api.post('/api/satislar', {
+        cari_id:    cariId,
+        urun_id:    urunId,
+        urun_adi:   urunAdi,
+        tarih:      document.getElementById('st-tarih').value,
+        adet,
+        birim_fiyat: fiyat,
+        aciklama:   document.getElementById('st-acik').value.trim()
+      });
+      if (r.ok) {
+        alert('Satış kaydedildi: ' + fmt(r.toplam));
+        document.getElementById('st-adet').value = '1';
+        document.getElementById('st-acik').value = '';
+        loadSatislar();
+      } else {
+        alert(r.error || 'Hata oluştu');
+      }
+    }
 
-async function satisSil(id) {
-  if (!confirm('Bu satış silinsin mi?')) return;
-  await api.delete('/api/satislar/' + id);
-  loadSatislar();
-}
+    async function satisSil(id) {
+      if (!confirm('Bu satış silinsin mi?')) return;
+      await api.delete('/api/satislar/' + id);
+      loadSatislar();
+    }
 
-// ── Ödemeler ───────────────────────────────────────────────────────────────────
-async function loadOdemeCombos() {
-  const cariler = await api.get('/api/cariler');
-  state.cariler = cariler;
-  const sel = document.getElementById('od-cari');
-  sel.innerHTML = '<option value="">-- Cari Seçin --</option>' + cariler.map(c => `<option value="${c.id}">${c.firma_adi}</option>`).join('');
-  document.getElementById('od-tarih').value = today();
-}
+    // ── Ödemeler ──────────────────────────────────────────────────────────────
+    async function loadOdemeCombos() {
+      const cariler = await api.get('/api/cariler');
+      state.cariler = cariler;
+      const sel = document.getElementById('od-cari');
+      sel.innerHTML = '<option value="">-- Cari Seçin --</option>' + cariler.map(c => `<option value="${c.id}">${c.firma_adi}</option>`).join('');
+      document.getElementById('od-tarih').value = today();
+    }
 
-async function loadOdemeler() {
-  state.odemeler = await api.get('/api/odemeler');
-  const el = document.getElementById('odeme-list');
-  if (!state.odemeler.length) { el.innerHTML = '<div class="empty">Henüz ödeme yok.</div>'; return; }
-  el.innerHTML = state.odemeler.map(o => `
-    <div class="tablo-item">
-      <div class="tablo-row1">
-        <div class="tablo-firma">${o.firma_adi}</div>
-        <div class="tablo-tutar" style="color:var(--green)">${fmt(o.tutar)}</div>
-      </div>
-      <div class="tablo-row2">
-        <div class="tablo-detail">${o.yontem}${o.aciklama ? ' · ' + o.aciklama : ''}</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="tablo-date">${o.tarih}</span>
-          <span onclick="odemeSil(${o.id})" style="color:var(--red);cursor:pointer;font-size:18px">×</span>
-        </div>
-      </div>
-    </div>`).join('');
-}
+    async function loadOdemeler() {
+      state.odemeler = await api.get('/api/odemeler');
+      const el = document.getElementById('odeme-list');
+      if (!state.odemeler.length) {
+        el.innerHTML = '<div class="empty">Henüz ödeme yok.</div>';
+        return;
+      }
+      el.innerHTML = state.odemeler.map(o => `
+        <div class="tablo-item">
+          <div class="tablo-row1">
+            <div class="tablo-firma">${o.firma_adi}</div>
+            <div class="tablo-tutar" style="color:var(--green)">${fmt(o.tutar)}</div>
+          </div>
+          <div class="tablo-row2">
+            <div class="tablo-detail">${o.yontem}${o.aciklama ? ' · ' + o.aciklama : ''}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="tablo-date">${o.tarih}</span>
+              <span onclick="odemeSil(${o.id})" style="color:var(--red);cursor:pointer;font-size:18px">×</span>
+            </div>
+          </div>
+        </div>`).join('');
+    }
 
-async function odemeKaydet() {
-  const cariId = document.getElementById('od-cari').value;
-  if (!cariId) { alert('Cari seçin'); return; }
-  const tutar = parseFloat(document.getElementById('od-tutar').value);
-  if (!tutar || tutar <= 0) { alert('Geçerli tutar girin'); return; }
-  const r = await api.post('/api/odemeler', {
-    cari_id: cariId,
-    tarih:   document.getElementById('od-tarih').value,
-    tutar,
-    yontem:   document.getElementById('od-yontem').value,
-    aciklama: document.getElementById('od-acik').value.trim()
-  });
-  if (r.ok) {
-    alert('Ödeme kaydedildi: ' + fmt(tutar));
-    document.getElementById('od-tutar').value = '0';
-    document.getElementById('od-acik').value = '';
-    loadOdemeler();
-  } else alert(r.error || 'Hata oluştu');
-}
+    async function odemeKaydet() {
+      const cariId = document.getElementById('od-cari').value;
+      if (!cariId) { alert('Cari seçin'); return; }
+      const tutar = parseFloat(document.getElementById('od-tutar').value);
+      if (!tutar || tutar <= 0) { alert('Geçerli tutar girin'); return; }
+      const r = await api.post('/api/odemeler', {
+        cari_id:  cariId,
+        tarih:    document.getElementById('od-tarih').value,
+        tutar,
+        yontem:   document.getElementById('od-yontem').value,
+        aciklama: document.getElementById('od-acik').value.trim()
+      });
+      if (r.ok) {
+        alert('Ödeme kaydedildi: ' + fmt(tutar));
+        document.getElementById('od-tutar').value = '0';
+        document.getElementById('od-acik').value  = '';
+        loadOdemeler();
+      } else {
+        alert(r.error || 'Hata oluştu');
+      }
+    }
 
-async function odemeSil(id) {
-  if (!confirm('Bu ödeme silinsin mi?')) return;
-  await api.delete('/api/odemeler/' + id);
-  loadOdemeler();
-}
+    async function odemeSil(id) {
+      if (!confirm('Bu ödeme silinsin mi?')) return;
+      await api.delete('/api/odemeler/' + id);
+      loadOdemeler();
+    }
 
-// ── Modal yardımcıları ─────────────────────────────────────────────────────────
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
-});
+    // ── Modal yardımcıları ────────────────────────────────────────────────────
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
 
-// ── Init ───────────────────────────────────────────────────────────────────────
-loadCariler();
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+      document.body.style.overflow = '';
+    }
 
-// PWA Service Worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/static/sw.js').catch(() => {});
-}
-</script>
+    document.querySelectorAll('.modal-overlay').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+    });
+
+    // ── PWA Service Worker ────────────────────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/sw.js').catch(() => {});
+    }
+
+    // ── Başlat ────────────────────────────────────────────────────────────────
+    checkAuth();
+  </script>
 </body>
 </html>
