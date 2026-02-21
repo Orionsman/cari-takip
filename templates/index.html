@@ -434,11 +434,11 @@
     // ── Supabase ──────────────────────────────────────────────────────────────
     const SUPABASE_URL = "https://heympechtvitgcouzelm.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhleW1wZWNodHZpdGdjb3V6ZWxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE1ODIzNTgsImV4cCI6MjA4NzE1ODM1OH0.39HTPMgdu3FT8jmcQqmum3pvY6sWzLLvwWnhuY4pU-Q";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // ── Auth ──────────────────────────────────────────────────────────────────
     async function checkAuth() {
-      const { data } = await supabase.auth.getSession();
+      const { data } = await sb.auth.getSession();
       if (data.session) {
         localStorage.setItem("token", data.session.access_token);
         document.getElementById("login-screen").style.display = "none";
@@ -456,7 +456,7 @@
       const password = document.getElementById("password").value;
       if (!email || !password) { alert("E-posta ve şifre gereklidir"); return; }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) { alert("Hatalı e-posta veya şifre"); return; }
 
       localStorage.setItem("token", data.session.access_token);
@@ -464,7 +464,7 @@
     }
 
     async function logout() {
-      await supabase.auth.signOut();
+      await sb.auth.signOut();
       localStorage.removeItem("token");
       checkAuth();
     }
